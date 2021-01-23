@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
 	"strconv"
@@ -14,10 +15,6 @@ import (
 	"github.com/tal-tech/go-zero/core/stores/redis/redistest"
 	"github.com/tal-tech/go-zero/core/syncx"
 )
-
-import jsoniter "github.com/json-iterator/go"
-
-var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type mockedNode struct {
 	vals        map[string][]byte

@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -18,10 +19,6 @@ import (
 	"github.com/tal-tech/go-zero/tools/goctl/util"
 	"github.com/urfave/cli"
 )
-
-import jsoniter "github.com/json-iterator/go"
-
-var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const pluginArg = "_plugin"
 

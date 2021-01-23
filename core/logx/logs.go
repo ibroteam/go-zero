@@ -1,6 +1,7 @@
 package logx
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -20,10 +21,6 @@ import (
 	"github.com/tal-tech/go-zero/core/sysx"
 	"github.com/tal-tech/go-zero/core/timex"
 )
-
-import jsoniter "github.com/json-iterator/go"
-
-var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const (
 	// InfoLevel logs everything

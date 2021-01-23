@@ -1,6 +1,7 @@
 package mapping
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
@@ -13,10 +14,6 @@ import (
 	"github.com/tal-tech/go-zero/core/lang"
 	"github.com/tal-tech/go-zero/core/stringx"
 )
-
-import jsoniter "github.com/json-iterator/go"
-
-var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const (
 	defaultKeyName = "key"
@@ -224,7 +221,7 @@ func (u *Unmarshaler) processFieldPrimitive(field reflect.StructField, value ref
 		return u.fillMap(field, value, mapValue)
 	default:
 		switch v := mapValue.(type) {
-		case jsoniter.Number:
+		case json.Number:
 			return u.processFieldPrimitiveWithJsonNumber(field, value, v, opts, fullName)
 		default:
 			if typeKind == valueKind {
@@ -241,7 +238,7 @@ func (u *Unmarshaler) processFieldPrimitive(field reflect.StructField, value ref
 }
 
 func (u *Unmarshaler) processFieldPrimitiveWithJsonNumber(field reflect.StructField, value reflect.Value,
-	v jsoniter.Number, opts *fieldOptionsWithContext, fullName string) error {
+	v json.Number, opts *fieldOptionsWithContext, fullName string) error {
 	fieldType := field.Type
 	fieldKind := fieldType.Kind()
 	typeKind := Deref(fieldType).Kind()
@@ -490,11 +487,11 @@ func (u *Unmarshaler) fillSliceFromString(fieldType reflect.Type, value reflect.
 
 func (u *Unmarshaler) fillSliceValue(slice reflect.Value, index int, baseKind reflect.Kind, value interface{}) error {
 	switch v := value.(type) {
-	case jsoniter.Number:
+	case json.Number:
 		return setValue(baseKind, slice.Index(index), v.String())
 	default:
 		// don't need to consider the difference between int, int8, int16, int32, int64,
-		// uint, uint8, uint16, uint32, uint64, because they're handled as jsoniter.Number.
+		// uint, uint8, uint16, uint32, uint64, because they're handled as json..Number.
 		if slice.Index(index).Kind() != reflect.TypeOf(value).Kind() {
 			return errTypeMismatch
 		}
@@ -561,7 +558,7 @@ func (u *Unmarshaler) generateMap(keyType, elemType reflect.Type, mapValue inter
 			switch v := keythData.(type) {
 			case string:
 				targetValue.SetMapIndex(key, reflect.ValueOf(v))
-			case jsoniter.Number:
+			case json.Number:
 				target := reflect.New(dereffedElemType)
 				if err := setValue(dereffedElemKind, target.Elem(), v.String()); err != nil {
 					return emptyValue, err
@@ -625,7 +622,7 @@ func fillPrimitive(fieldType reflect.Type, value reflect.Value, mapValue interfa
 	if fieldType.Kind() == reflect.Ptr {
 		target := reflect.New(baseType).Elem()
 		switch mapValue.(type) {
-		case string, jsoniter.Number:
+		case string, json.Number:
 			value.Set(target.Addr())
 			value = target
 		}
@@ -634,7 +631,7 @@ func fillPrimitive(fieldType reflect.Type, value reflect.Value, mapValue interfa
 	switch v := mapValue.(type) {
 	case string:
 		return validateAndSetValue(baseType.Kind(), value, v, opts)
-	case jsoniter.Number:
+	case json.Number:
 		if err := validateJsonNumberRange(v, opts); err != nil {
 			return err
 		}

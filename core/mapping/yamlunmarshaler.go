@@ -1,14 +1,13 @@
 package mapping
 
 import (
+	"encoding/json"
 	"errors"
 	"io"
 	"io/ioutil"
 
 	"gopkg.in/yaml.v2"
 )
-
-import jsoniter "github.com/json-iterator/go"
 
 // To make .json & .yaml consistent, we just use json as the tag key.
 const yamlTagKey = "json"
@@ -68,8 +67,8 @@ func cleanupInterfaceMap(in map[interface{}]interface{}) map[string]interface{} 
 	return res
 }
 
-func cleanupInterfaceNumber(in interface{}) jsoniter.Number {
-	return jsoniter.Number(Repr(in))
+func cleanupInterfaceNumber(in interface{}) json.Number {
+	return json.Number(Repr(in))
 }
 
 func cleanupInterfaceSlice(in []interface{}) []interface{} {

@@ -2,6 +2,7 @@ package serverinterceptors
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/tal-tech/go-zero/core/logx"
@@ -10,10 +11,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"
 )
-
-import jsoniter "github.com/json-iterator/go"
-
-var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const serverSlowThreshold = time.Millisecond * 500
 
