@@ -2,7 +2,6 @@ package sqlc
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -24,6 +23,10 @@ import (
 	"github.com/tal-tech/go-zero/core/stores/redis/redistest"
 	"github.com/tal-tech/go-zero/core/stores/sqlx"
 )
+
+import jsoniter "github.com/json-iterator/go"
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 func init() {
 	logx.Disable()

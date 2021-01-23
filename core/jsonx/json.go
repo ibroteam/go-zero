@@ -2,11 +2,14 @@ package jsonx
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"strings"
 )
+
+import jsoniter "github.com/json-iterator/go"
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 func Marshal(v interface{}) ([]byte, error) {
 	return json.Marshal(v)
@@ -41,7 +44,7 @@ func UnmarshalFromReader(reader io.Reader, v interface{}) error {
 	return nil
 }
 
-func unmarshalUseNumber(decoder *json.Decoder, v interface{}) error {
+func unmarshalUseNumber(decoder *jsoniter.Decoder, v interface{}) error {
 	decoder.UseNumber()
 	return decoder.Decode(v)
 }

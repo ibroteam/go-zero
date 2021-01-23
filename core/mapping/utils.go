@@ -1,7 +1,6 @@
 package mapping
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -12,6 +11,8 @@ import (
 
 	"github.com/tal-tech/go-zero/core/stringx"
 )
+
+import jsoniter "github.com/json-iterator/go"
 
 const (
 	defaultOption   = "default"
@@ -452,7 +453,7 @@ func validateAndSetValue(kind reflect.Kind, value reflect.Value, str string, opt
 	return setMatchedPrimitiveValue(kind, value, v)
 }
 
-func validateJsonNumberRange(v json.Number, opts *fieldOptionsWithContext) error {
+func validateJsonNumberRange(v jsoniter.Number, opts *fieldOptionsWithContext) error {
 	if opts == nil || opts.Range == nil {
 		return nil
 	}

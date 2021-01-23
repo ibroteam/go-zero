@@ -1,11 +1,13 @@
 package jsontype
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/globalsign/mgo/bson"
+	jsoniter "github.com/json-iterator/go"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type MilliTime struct {
 	time.Time

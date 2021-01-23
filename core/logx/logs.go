@@ -1,7 +1,6 @@
 package logx
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -21,6 +20,10 @@ import (
 	"github.com/tal-tech/go-zero/core/sysx"
 	"github.com/tal-tech/go-zero/core/timex"
 )
+
+import jsoniter "github.com/json-iterator/go"
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const (
 	// InfoLevel logs everything
@@ -104,6 +107,20 @@ type (
 
 func MustSetup(c LogConf) {
 	Must(SetUp(c))
+}
+
+// RewriteSlowLogger 重定向 slow 日志
+func RewriteSlowLogger(slow io.WriteCloser) {
+	if slow != nil {
+		slowLog = slow
+	}
+}
+
+// RewriteStatLogger 重定向 stat 日志
+func RewriteStatLogger(stat io.WriteCloser) {
+	if stat != nil {
+		statLog = stat
+	}
 }
 
 // SetUp sets up the logx. If already set up, just return nil.

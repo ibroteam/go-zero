@@ -1,7 +1,6 @@
 package mongo
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/globalsign/mgo"
@@ -10,6 +9,10 @@ import (
 	"github.com/tal-tech/go-zero/core/stores/mongo/internal"
 	"github.com/tal-tech/go-zero/core/timex"
 )
+
+import jsoniter "github.com/json-iterator/go"
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const slowThreshold = time.Millisecond * 500
 

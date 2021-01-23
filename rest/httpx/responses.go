@@ -1,12 +1,15 @@
 package httpx
 
 import (
-	"encoding/json"
 	"net/http"
 	"sync"
 
 	"github.com/tal-tech/go-zero/core/logx"
 )
+
+import jsoniter "github.com/json-iterator/go"
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 var (
 	errorHandler func(error) (int, interface{})

@@ -2,13 +2,16 @@ package stat
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"net/http"
 	"time"
 
 	"github.com/tal-tech/go-zero/core/logx"
 )
+
+import jsoniter "github.com/json-iterator/go"
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const httpTimeout = time.Second * 5
 

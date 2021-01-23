@@ -1,7 +1,6 @@
 package mapping
 
 import (
-	"encoding/json"
 	"strconv"
 	"testing"
 	"time"
@@ -10,7 +9,9 @@ import (
 	"github.com/tal-tech/go-zero/core/stringx"
 )
 
-// because json.Number doesn't support strconv.ParseUint(...),
+import jsoniter "github.com/json-iterator/go"
+
+// because jsoniter.Number doesn't support strconv.ParseUint(...),
 // so we only can test to 62 bits.
 const maxUintBitsToTest = 62
 
@@ -752,7 +753,7 @@ func TestUnmarshalJsonNumberInt64(t *testing.T) {
 	for i := 0; i <= maxUintBitsToTest; i++ {
 		var intValue int64 = 1 << uint(i)
 		strValue := strconv.FormatInt(intValue, 10)
-		var number = json.Number(strValue)
+		var number = jsoniter.Number(strValue)
 		m := map[string]interface{}{
 			"Id": number,
 		}
@@ -768,7 +769,7 @@ func TestUnmarshalJsonNumberUint64(t *testing.T) {
 	for i := 0; i <= maxUintBitsToTest; i++ {
 		var intValue uint64 = 1 << uint(i)
 		strValue := strconv.FormatUint(intValue, 10)
-		var number = json.Number(strValue)
+		var number = jsoniter.Number(strValue)
 		m := map[string]interface{}{
 			"Id": number,
 		}
@@ -784,7 +785,7 @@ func TestUnmarshalJsonNumberUint64Ptr(t *testing.T) {
 	for i := 0; i <= maxUintBitsToTest; i++ {
 		var intValue uint64 = 1 << uint(i)
 		strValue := strconv.FormatUint(intValue, 10)
-		var number = json.Number(strValue)
+		var number = jsoniter.Number(strValue)
 		m := map[string]interface{}{
 			"Id": number,
 		}
@@ -1903,9 +1904,9 @@ func TestUnmarshalNumberRangeJsonNumber(t *testing.T) {
 		Value5 uint16 `key:"value5,range=(1:5]"`
 	}
 	m := map[string]interface{}{
-		"value3": json.Number("2"),
-		"value4": json.Number("4"),
-		"value5": json.Number("5"),
+		"value3": jsoniter.Number("2"),
+		"value4": jsoniter.Number("4"),
+		"value5": jsoniter.Number("5"),
 	}
 
 	var in inner
@@ -1919,7 +1920,7 @@ func TestUnmarshalNumberRangeJsonNumber(t *testing.T) {
 		Value int `key:"value,range=(1:5]"`
 	}
 	m = map[string]interface{}{
-		"value": json.Number("a"),
+		"value": jsoniter.Number("a"),
 	}
 
 	var in1 inner1
@@ -2023,7 +2024,7 @@ func TestUnmarshalNumberRangeIntOutOfRange(t *testing.T) {
 		"value": int64(5),
 	}, &in1))
 	assert.Equal(t, errNumberRange, UnmarshalKey(map[string]interface{}{
-		"value": json.Number("6"),
+		"value": jsoniter.Number("6"),
 	}, &in1))
 
 	type inner2 struct {
@@ -2195,7 +2196,7 @@ func TestUnmarshalNumberRangeFloatOutOfRange(t *testing.T) {
 		"value": float64(5),
 	}, &in1))
 	assert.Equal(t, errNumberRange, UnmarshalKey(map[string]interface{}{
-		"value": json.Number("6"),
+		"value": jsoniter.Number("6"),
 	}, &in1))
 
 	type inner2 struct {
