@@ -936,6 +936,20 @@ func (s *Redis) Spop(key string) (val string, err error) {
 	return
 }
 
+func (s *Redis) SpopN(key string, count int64) (vals []string, err error) {
+	err = s.brk.DoWithAcceptable(func() error {
+		conn, err := getRedis(s)
+		if err != nil {
+			return err
+		}
+
+		vals, err = conn.SPopN(key, count).Result()
+		return err
+	}, acceptable)
+
+	return
+}
+
 func (s *Redis) Srandmember(key string, count int) (val []string, err error) {
 	err = s.brk.DoWithAcceptable(func() error {
 		conn, err := getRedis(s)

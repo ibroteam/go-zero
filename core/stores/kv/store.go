@@ -52,6 +52,7 @@ type (
 		Sismember(key string, value interface{}) (bool, error)
 		Smembers(key string) ([]string, error)
 		Spop(key string) (string, error)
+		SpopN(key string, count int64) ([]string, error)
 		Srandmember(key string, count int) ([]string, error)
 		Srem(key string, values ...interface{}) (int, error)
 		Sscan(key string, cursor uint64, match string, count int64) (keys []string, cur uint64, err error)
@@ -451,6 +452,15 @@ func (cs clusterStore) Spop(key string) (string, error) {
 	}
 
 	return node.Spop(key)
+}
+
+func (cs clusterStore) SpopN(key string, count int64) ([]string, error) {
+	node, err := cs.getRedis(key)
+	if err != nil {
+		return []string{}, err
+	}
+
+	return node.SpopN(key, count)
 }
 
 func (cs clusterStore) Srandmember(key string, count int) ([]string, error) {
