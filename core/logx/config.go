@@ -16,7 +16,7 @@ type SlsConf struct {
 
 type LogConf struct {
 	ServiceName         string  `json:",optional"`
-	Mode                string  `json:",default=console,options=console|file|volume"`
+	Mode                string  `json:",default=console,options=console|file|volume|sls"`
 	Path                string  `json:",default=logs"`
 	Level               string  `json:",default=info,options=info|error|severe"`
 	Compress            bool    `json:",optional"`
