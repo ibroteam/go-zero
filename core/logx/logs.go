@@ -391,6 +391,17 @@ func setupWithConsole(c LogConf) {
 }
 
 func setupWithSls(c LogConf) error {
+	if len(c.Sls.AccessKeyID) < 1 ||
+		len(c.Sls.AccessKeySecret) < 1 ||
+		len(c.Sls.Endpoint) < 1 ||
+		len(c.Sls.InfoStore) < 1 ||
+		len(c.Sls.ErrorStore) < 1 ||
+		len(c.Sls.SevereStore) < 1 ||
+		len(c.Sls.SlowStore) < 1 ||
+		len(c.Sls.StackStore) < 1 {
+		return errors.New("sls config misss")
+	}
+
 	once.Do(func() {
 		atomic.StoreUint32(&initialized, 1)
 		writeConsole = false
