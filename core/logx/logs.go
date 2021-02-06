@@ -412,7 +412,7 @@ func setupWithSls(c LogConf) error {
 		severeLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret, c.Sls.SevereStore)
 		slowLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret, c.Sls.SlowStore)
 		stackLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret, c.Sls.StackStore)
-		statLog = infoLog
+		statLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret, c.Sls.StatStore)
 	})
 	return nil
 }
