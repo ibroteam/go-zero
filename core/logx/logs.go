@@ -42,6 +42,7 @@ const (
 
 	consoleMode = "console"
 	volumeMode  = "volume"
+	slsMode     = "sls"
 
 	levelAlert  = "alert"
 	levelInfo   = "info"
@@ -159,6 +160,8 @@ func SetUp(c LogConf) error {
 		return nil
 	case volumeMode:
 		return setupWithVolume(c)
+	case slsMode:
+		return setupWithSls(c)
 	default:
 		return setupWithFiles(c)
 	}
@@ -427,6 +430,22 @@ func setupWithConsole(c LogConf) {
 		stackLog = NewLessWriter(errorLog, options.logStackCooldownMills)
 		statLog = infoLog
 	})
+}
+
+func setupWithSls(c LogConf) error {
+	once.Do(func() {
+		atomic.StoreUint32(&initialized, 1)
+		writeConsole = false
+		setupLogLevel(c)
+
+		infoLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret, c.Sls.InfoStore)
+		errorLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret, c.Sls.ErrorStore)
+		severeLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret, c.Sls.SevereStore)
+		slowLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret, c.Sls.SlowStore)
+		stackLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret, c.Sls.StackStore)
+		statLog = infoLog
+	})
+	return nil
 }
 
 func setupWithFiles(c LogConf) error {
