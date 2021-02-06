@@ -1,5 +1,10 @@
 package logx
 
+type WaringRobotConf struct {
+	NotifyUrl string
+	Secret    string
+}
+
 type SlsConf struct {
 	AccessKeyID     string
 	AccessKeySecret string
@@ -12,6 +17,7 @@ type SlsConf struct {
 	SlowStore   string
 	StackStore  string
 	SevereStore string
+	WaringRobot WaringRobotConf `json:"WaringRobot,optional"`
 }
 
 type LogConf struct {

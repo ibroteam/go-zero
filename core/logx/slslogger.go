@@ -4,19 +4,24 @@ import (
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/aliyun-log-go-sdk/producer"
 	"github.com/gogo/protobuf/proto"
+	"github.com/tal-tech/go-zero/core/dingtalk"
+	"github.com/tal-tech/go-zero/core/dingtalk/message"
 	"github.com/tal-tech/go-zero/core/netx"
 	"time"
 )
 
 type slsWriter struct {
-	project  string
-	logStore string
-	source   string
-	topic    string
-	producer *producer.Producer
+	project            string
+	logStore           string
+	source             string
+	topic              string
+	producer           *producer.Producer
+	hasRobotWarning    bool
+	warningRobotUrl    string
+	warningRobotSecret string
 }
 
-func newSlsWriter(AppName, Endpoint, Project, AccessKeyID, AccessKeySecret, LogStore string) *slsWriter {
+func newSlsWriter(AppName, Endpoint, Project, AccessKeyID, AccessKeySecret, LogStore string, warn *WaringRobotConf) *slsWriter {
 	localIp := netx.InternalIp()
 
 	producerConfig := producer.GetDefaultProducerConfig()
@@ -25,15 +30,22 @@ func newSlsWriter(AppName, Endpoint, Project, AccessKeyID, AccessKeySecret, LogS
 	producerConfig.AccessKeySecret = AccessKeySecret
 	producerInstance := producer.InitProducer(producerConfig)
 
-	producerInstance.Start()
-
-	return &slsWriter{
+	l := &slsWriter{
 		project:  Project,
 		logStore: LogStore,
 		source:   localIp,
 		topic:    AppName,
 		producer: producerInstance,
 	}
+
+	if warn != nil && len(warn.NotifyUrl) > 0 && len(warn.Secret) > 0 {
+		l.hasRobotWarning = true
+		l.warningRobotUrl = warn.NotifyUrl
+		l.warningRobotSecret = warn.Secret
+	}
+
+	producerInstance.Start()
+	return l
 }
 
 func (l *slsWriter) Close() error {
@@ -51,6 +63,12 @@ func (l *slsWriter) Write(data []byte) (int, error) {
 			},
 		},
 	}
+
+	if l.hasRobotWarning {
+		go dingtalk.SendRobotMessage(l.warningRobotUrl, l.warningRobotSecret,
+			message.NewMarkdownMessage("error", string(data)))
+	}
+
 	err := l.producer.SendLog(l.project, l.logStore, l.topic, l.source, log)
 	return len(data), err
 }

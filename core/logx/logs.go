@@ -407,12 +407,23 @@ func setupWithSls(c LogConf) error {
 		writeConsole = false
 		setupLogLevel(c)
 
-		infoLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret, c.Sls.InfoStore)
-		errorLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret, c.Sls.ErrorStore)
-		severeLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret, c.Sls.SevereStore)
-		slowLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret, c.Sls.SlowStore)
-		stackLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret, c.Sls.StackStore)
-		statLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret, c.Sls.StatStore)
+		infoLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret,
+			c.Sls.InfoStore, nil)
+
+		severeLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret,
+			c.Sls.SevereStore, nil)
+
+		slowLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret,
+			c.Sls.SlowStore, nil)
+
+		stackLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret,
+			c.Sls.StackStore, &c.Sls.WaringRobot)
+
+		statLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret,
+			c.Sls.StatStore, nil)
+
+		errorLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret,
+			c.Sls.ErrorStore, &c.Sls.WaringRobot)
 	})
 	return nil
 }
