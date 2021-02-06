@@ -34,7 +34,12 @@ func GetMessageSign(timestamp int64, secret string) string {
 
 func SendRobotMessage(url, secret string, msg message.Message) error {
 	timestamp := time.Now().Unix() * 1000
-	reqUrl := url + "&timestamp=" + strconv.FormatInt(timestamp, 10) + "&sign=" + GetMessageSign(timestamp, secret)
+	var reqUrl string
+	if secret != "" {
+		reqUrl = url + "&timestamp=" + strconv.FormatInt(timestamp, 10) + "&sign=" + GetMessageSign(timestamp, secret)
+	} else {
+		reqUrl = url + "&timestamp=" + strconv.FormatInt(timestamp, 10)
+	}
 	req, err := http.NewRequest(http.MethodPost, reqUrl, bytes.NewReader(msg.ToJson()))
 	if err != nil {
 		return err
