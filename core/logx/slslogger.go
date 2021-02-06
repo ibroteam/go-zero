@@ -16,7 +16,7 @@ type slsWriter struct {
 	producer *producer.Producer
 }
 
-func newSlsWriter(AppName, Project, Endpoint, AccessKeyID, AccessKeySecret, LogStore string) *slsWriter {
+func newSlsWriter(AppName, Endpoint, Project, AccessKeyID, AccessKeySecret, LogStore string) *slsWriter {
 	localIp := netx.InternalIp()
 
 	producerConfig := producer.GetDefaultProducerConfig()

@@ -107,48 +107,6 @@ func MustSetup(c LogConf) {
 	Must(SetUp(c))
 }
 
-// RewriteSlowLogger 重定向 slow 日志
-func RewriteSlowLogger(slow io.WriteCloser) {
-	if slow != nil {
-		slowLog = slow
-	}
-}
-
-// RewriteStatLogger 重定向 stat 日志
-func RewriteStatLogger(stat io.WriteCloser) {
-	if stat != nil {
-		statLog = stat
-	}
-}
-
-// RewriteInfoLogger 重定向 slow 日志
-func RewriteInfoLogger(info io.WriteCloser) {
-	if info != nil {
-		infoLog = info
-	}
-}
-
-// RewriteErrorLogger 重定向 error 日志
-func RewriteErrorLogger(errLog io.WriteCloser) {
-	if errLog != nil {
-		errorLog = errLog
-	}
-}
-
-// RewriteSevereLogger 重定向 severe 日志
-func RewriteSevereLogger(ser io.WriteCloser) {
-	if ser != nil {
-		severeLog = ser
-	}
-}
-
-// RewriteStatLogger 重定向 stack 日志
-func RewriteStackLogger(stack io.WriteCloser) {
-	if stack != nil {
-		stackLog = stack
-	}
-}
-
 // SetUp sets up the logx. If already set up, just return nil.
 // we allow SetUp to be called multiple times, because for example
 // we need to allow different service frameworks to initialize logx respectively.
