@@ -508,7 +508,7 @@ func slowSync(msg string) {
 
 func stackSync(msg string) {
 	if shouldLog(ErrorLevel) {
-		output(stackLog, levelError, fmt.Sprintf("%s\n%s", msg, string(debug.Stack())))
+		output(stackLog, levelError, fmt.Sprintf("%s\n%s", msg, getCaller(durationCallerDepth)))
 	}
 }
 

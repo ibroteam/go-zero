@@ -96,6 +96,6 @@ func logInstanceError(datasource string, err error) {
 
 func logSqlError(stmt string, err error) {
 	if err != nil && err != ErrNotFound {
-		logx.Errorf("stmt: %s, error: %s", stmt, err.Error())
+		logx.ErrorStackf("stmt: %s, error: %s", stmt, err.Error())
 	}
 }
