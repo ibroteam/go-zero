@@ -40,7 +40,7 @@ func newSlsWriter(AppName, Endpoint, Project, AccessKeyID, AccessKeySecret, LogS
 		producer: producerInstance,
 	}
 
-	if warn != nil && len(warn.NotifyUrl) > 0 && len(warn.Secret) > 0 {
+	if warn != nil && len(warn.NotifyUrl) > 0 {
 		l.hasRobotWarning = true
 		l.warningRobotUrl = warn.NotifyUrl
 		l.warningRobotSecret = warn.Secret

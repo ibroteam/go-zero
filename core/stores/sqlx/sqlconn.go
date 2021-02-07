@@ -2,7 +2,6 @@ package sqlx
 
 import (
 	"database/sql"
-	"github.com/pkg/errors"
 
 	"github.com/tal-tech/go-zero/core/breaker"
 )
@@ -90,13 +89,6 @@ func (db *commonSqlConn) Exec(q string, args ...interface{}) (result sql.Result,
 		return err
 	}, db.acceptable)
 
-	// @CRACK begin
-	// 2021-02-05 by hujiachao
-	// 在SQL报错error中添加堆栈信息，方便定位问题
-	if err != ErrNotFound {
-		err = errors.WithStack(err)
-	}
-	// @CRACK end
 	return
 }
 
@@ -119,85 +111,37 @@ func (db *commonSqlConn) Prepare(query string) (stmt StmtSession, err error) {
 		}
 	}, db.acceptable)
 
-	// @CRACK begin
-	// 2021-02-05 by hujiachao
-	// 在SQL报错error中添加堆栈信息，方便定位问题
-	if err != ErrNotFound {
-		err = errors.WithStack(err)
-	}
-	// @CRACK end
-
 	return
 }
 
 func (db *commonSqlConn) QueryRow(v interface{}, q string, args ...interface{}) error {
-	err := db.queryRows(func(rows *sql.Rows) error {
+	return db.queryRows(func(rows *sql.Rows) error {
 		return unmarshalRow(v, rows, true)
 	}, q, args...)
-	// @CRACK begin
-	// 2021-02-05 by hujiachao
-	// 在SQL报错error中添加堆栈信息，方便定位问题
-	if err != ErrNotFound {
-		return errors.WithStack(err)
-	}
-	// @CRACK end
-	return err
 }
 
 func (db *commonSqlConn) QueryRowPartial(v interface{}, q string, args ...interface{}) error {
-	err := db.queryRows(func(rows *sql.Rows) error {
+	return db.queryRows(func(rows *sql.Rows) error {
 		return unmarshalRow(v, rows, false)
 	}, q, args...)
-	// @CRACK begin
-	// 2021-02-05 by hujiachao
-	// 在SQL报错error中添加堆栈信息，方便定位问题
-	if err != ErrNotFound {
-		return errors.WithStack(err)
-	}
-	// @CRACK end
-	return err
 }
 
 func (db *commonSqlConn) QueryRows(v interface{}, q string, args ...interface{}) error {
-	err := db.queryRows(func(rows *sql.Rows) error {
+	return db.queryRows(func(rows *sql.Rows) error {
 		return unmarshalRows(v, rows, true)
 	}, q, args...)
-	// @CRACK begin
-	// 2021-02-05 by hujiachao
-	// 在SQL报错error中添加堆栈信息，方便定位问题
-	if err != ErrNotFound {
-		return errors.WithStack(err)
-	}
-	// @CRACK end
-	return err
 }
 
 func (db *commonSqlConn) QueryRowsPartial(v interface{}, q string, args ...interface{}) error {
-	err := db.queryRows(func(rows *sql.Rows) error {
+	return db.queryRows(func(rows *sql.Rows) error {
 		return unmarshalRows(v, rows, false)
 	}, q, args...)
-	// @CRACK begin
-	// 2021-02-05 by hujiachao
-	// 在SQL报错error中添加堆栈信息，方便定位问题
-	if err != ErrNotFound {
-		return errors.WithStack(err)
-	}
-	// @CRACK end
-	return err
 }
 
 func (db *commonSqlConn) Transact(fn func(Session) error) error {
-	err := db.brk.DoWithAcceptable(func() error {
+	return db.brk.DoWithAcceptable(func() error {
 		return transact(db, db.beginTx, fn)
 	}, db.acceptable)
-	// @CRACK begin
-	// 2021-02-05 by hujiachao
-	// 在SQL报错error中添加堆栈信息，方便定位问题
-	if err != ErrNotFound {
-		err = errors.WithStack(err)
-	}
-	// @CRACK end
-	return err
 }
 
 func (db *commonSqlConn) acceptable(err error) bool {
