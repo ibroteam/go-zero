@@ -13,16 +13,6 @@ func UnaryTimeoutInterceptor(timeout time.Duration) grpc.UnaryServerInterceptor 
 		handler grpc.UnaryHandler) (resp interface{}, err error) {
 		ctx, cancel := contextx.ShrinkDeadline(ctx, timeout)
 		defer cancel()
-		// @CRACK begin
-		// 2021-02-06 by hujiachao
-		// 当RPC运行时遇到异常，将其报出来
-		result, err := handler(ctx, req)
-		if err != nil {
-			//content := fmt.Sprintf("%+v\n\nREQ:\n%s\n%+v\n", err, reflect.TypeOf(req).String(), req)
-			//logx.ErrorStack(content)
-		}
-		return result, err
-		// return handler(ctx, req)
-		// @CRACK end
+		return handler(ctx, req)
 	}
 }
