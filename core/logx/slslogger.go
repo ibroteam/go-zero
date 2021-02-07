@@ -11,6 +11,7 @@ import (
 )
 
 type slsWriter struct {
+	*limitedExecutor
 	project            string
 	logStore           string
 	source             string
@@ -42,6 +43,7 @@ func newSlsWriter(AppName, Endpoint, Project, AccessKeyID, AccessKeySecret, LogS
 		l.hasRobotWarning = true
 		l.warningRobotUrl = warn.NotifyUrl
 		l.warningRobotSecret = warn.Secret
+		l.limitedExecutor = newLimitedExecutor(warn.ReportIntervalLimitMillis)
 	}
 
 	producerInstance.Start()
@@ -65,8 +67,10 @@ func (l *slsWriter) Write(data []byte) (int, error) {
 	}
 
 	if l.hasRobotWarning {
-		go dingtalk.SendRobotMessage(l.warningRobotUrl, l.warningRobotSecret,
-			message.NewMarkdownMessage("error", string(data)))
+		l.logOrDiscard(func() {
+			go dingtalk.SendRobotMessage(l.warningRobotUrl, l.warningRobotSecret,
+				message.NewMarkdownMessage("error", string(data)))
+		})
 	}
 
 	err := l.producer.SendLog(l.project, l.logStore, l.topic, l.source, log)

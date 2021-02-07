@@ -1,8 +1,9 @@
 package logx
 
 type WaringRobotConf struct {
-	NotifyUrl string
-	Secret    string
+	NotifyUrl                 string
+	Secret                    string
+	ReportIntervalLimitMillis int `json:",default=2000"`
 }
 
 type SlsConf struct {
