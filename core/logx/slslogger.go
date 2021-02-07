@@ -7,6 +7,7 @@ import (
 	"github.com/tal-tech/go-zero/core/dingtalk"
 	"github.com/tal-tech/go-zero/core/dingtalk/message"
 	"github.com/tal-tech/go-zero/core/netx"
+	"github.com/tal-tech/go-zero/core/sysx"
 	"time"
 )
 
@@ -68,8 +69,9 @@ func (l *slsWriter) Write(data []byte) (int, error) {
 
 	if l.hasRobotWarning {
 		l.logOrDiscard(func() {
-			go dingtalk.SendRobotMessage(l.warningRobotUrl, l.warningRobotSecret,
-				message.NewMarkdownMessage("error", string(data)))
+			title := "error@" + sysx.Hostname()
+			content := string(data)
+			go dingtalk.SendRobotMessage(l.warningRobotUrl, l.warningRobotSecret, message.NewMarkdownMessageGeneral(title, content))
 		})
 	}
 
