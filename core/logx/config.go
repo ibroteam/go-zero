@@ -3,7 +3,7 @@ package logx
 type WaringRobotConf struct {
 	NotifyUrl                 string
 	Secret                    string
-	ReportIntervalLimitMillis int `json:",default=2000"`
+	ReportIntervalLimitMillis int `json:",default=10000"`
 }
 
 type SlsConf struct {
