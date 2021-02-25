@@ -1,6 +1,7 @@
 package logx
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -354,8 +355,16 @@ func outputError(writer io.Writer, msg string, callDepth int) {
 	output(writer, levelError, content)
 }
 
+func MarshalLog(info interface{}) ([]byte, error) {
+	buf := &bytes.Buffer{}
+	enc := json.NewEncoder(buf)
+	enc.SetEscapeHTML(false)
+	err := enc.Encode(info)
+	return buf.Bytes(), err
+}
+
 func outputJson(writer io.Writer, info interface{}) {
-	if content, err := json.Marshal(info); err != nil {
+	if content, err := MarshalLog(info); err != nil {
 		log.Println(err.Error())
 	} else if atomic.LoadUint32(&initialized) == 0 || writer == nil {
 		log.Println(string(content))
