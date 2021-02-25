@@ -124,6 +124,7 @@ func logBrief(r *http.Request, code int, timer *utils.ElapsedTimer, logs *intern
 	duration := timer.Duration()
 	buf.WriteString(fmt.Sprintf("%d - %s - %s - %s - %s",
 		code, r.RequestURI, httpx.GetRemoteAddr(r), r.UserAgent(), timex.ReprOfDuration(duration)))
+
 	if duration > slowThreshold {
 		logx.WithContext(r.Context()).Slowf("[HTTP] %d - %s - %s - %s - slowcall(%s)",
 			code, r.RequestURI, httpx.GetRemoteAddr(r), r.UserAgent(), timex.ReprOfDuration(duration))
@@ -131,12 +132,13 @@ func logBrief(r *http.Request, code int, timer *utils.ElapsedTimer, logs *intern
 
 	ok := isOkResponse(code)
 	if !ok {
-		buf.WriteString(fmt.Sprintf("\n%s", dumpRequest(r)))
+		buf.WriteString(dumpRequest(r))
 	}
 
 	body := logs.Flush()
 	if len(body) > 0 {
-		buf.WriteString(fmt.Sprintf("\n%s", body))
+		buf.WriteString("\n")
+		buf.WriteString(body)
 	}
 
 	if ok {
@@ -150,8 +152,11 @@ func logDetails(r *http.Request, response *DetailLoggedResponseWriter, timer *ut
 	logs *internal.LogCollector) {
 	var buf bytes.Buffer
 	duration := timer.Duration()
-	buf.WriteString(fmt.Sprintf("%d - %s - %s\n=> %s\n",
-		response.writer.code, r.RemoteAddr, timex.ReprOfDuration(duration), dumpRequest(r)))
+
+	buf.WriteString(fmt.Sprintf("%d - %s - %s\n",
+		response.writer.code, r.RemoteAddr, timex.ReprOfDuration(duration)))
+	buf.WriteString(dumpRequest(r))
+
 	if duration > slowThreshold {
 		logx.WithContext(r.Context()).Slowf("[HTTP] %d - %s - slowcall(%s)\n=> %s\n",
 			response.writer.code, r.RemoteAddr, timex.ReprOfDuration(duration), dumpRequest(r))
@@ -159,12 +164,13 @@ func logDetails(r *http.Request, response *DetailLoggedResponseWriter, timer *ut
 
 	body := logs.Flush()
 	if len(body) > 0 {
-		buf.WriteString(fmt.Sprintf("%s\n", body))
+		buf.WriteString(body)
 	}
 
 	respBuf := response.buf.Bytes()
 	if len(respBuf) > 0 {
-		buf.WriteString(fmt.Sprintf("<= %s", respBuf))
+		buf.WriteString("\n")
+		buf.WriteString(string(respBuf))
 	}
 
 	logx.WithContext(r.Context()).Info(buf.String())
