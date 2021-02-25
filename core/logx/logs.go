@@ -369,7 +369,7 @@ func outputJson(writer io.Writer, info interface{}) {
 	} else if atomic.LoadUint32(&initialized) == 0 || writer == nil {
 		log.Println(string(content))
 	} else {
-		writer.Write(append(content, '\n'))
+		writer.Write(content)
 	}
 }
 
