@@ -10,6 +10,7 @@ var (
 
 type (
 	RedisConf struct {
+		Name string `json:",optional"`
 		Host string
 		Type string `json:",default=node,options=node|cluster"`
 		Pass string `json:",optional"`
@@ -22,7 +23,10 @@ type (
 )
 
 func (rc RedisConf) NewRedis() *Redis {
-	return NewRedis(rc.Host, rc.Type, rc.Pass)
+	// 2021-03-09 by hujiachao
+	// 由于redis会区分内网/外网地址，虽然是同一个实例，Host不同会导致一致性hash到不同的位置
+	// 这样会影响本地debug线上问题，故增加Name字段用于替代Host计算hash，保证结果计算结果一致
+	return NewRedisWithName(rc.Name, rc.Host, rc.Type, rc.Pass)
 }
 
 func (rc RedisConf) Validate() error {

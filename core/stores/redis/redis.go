@@ -32,6 +32,7 @@ type (
 
 	// thread-safe
 	Redis struct {
+		Name string
 		Addr string
 		Type string
 		Pass string
@@ -65,6 +66,21 @@ func NewRedis(redisAddr, redisType string, redisPass ...string) *Redis {
 	}
 
 	return &Redis{
+		Addr: redisAddr,
+		Type: redisType,
+		Pass: pass,
+		brk:  breaker.NewBreaker(),
+	}
+}
+
+func NewRedisWithName(redisName, redisAddr, redisType string, redisPass ...string) *Redis {
+	var pass string
+	for _, v := range redisPass {
+		pass = v
+	}
+
+	return &Redis{
+		Name: redisName,
 		Addr: redisAddr,
 		Type: redisType,
 		Pass: pass,
@@ -1424,6 +1440,9 @@ func (s *Redis) Zunionstore(dest string, store ZStore, keys ...string) (val int6
 }
 
 func (s *Redis) String() string {
+	if s.Name != "" {
+		return s.Name
+	}
 	return s.Addr
 }
 
