@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -13,7 +11,30 @@ import (
 )
 
 func init() {
-	log.SetOutput(ioutil.Discard)
+	//log.SetOutput(ioutil.Discard)
+}
+
+func TestLogBenchmark(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "http://localhost:888/index?query=xxx", nil)
+	req.Header.Set("X-Test", "test")
+	handler := DetailedLogHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(slowThreshold + time.Millisecond*50)
+		r.Context().Value(internal.LogContext).(*internal.LogCollector).Append("anything")
+		w.Header().Set("X-Test", "test")
+		w.WriteHeader(http.StatusServiceUnavailable)
+		_, err := w.Write([]byte("content"))
+		assert.Nil(t, err)
+
+		flusher, ok := w.(http.Flusher)
+		assert.True(t, ok)
+		flusher.Flush()
+	}))
+
+	resp := httptest.NewRecorder()
+	handler.ServeHTTP(resp, req)
+	assert.Equal(t, http.StatusServiceUnavailable, resp.Code)
+	assert.Equal(t, "test", resp.Header().Get("X-Test"))
+	assert.Equal(t, "content", resp.Body.String())
 }
 
 func TestLogHandler(t *testing.T) {
@@ -23,7 +44,7 @@ func TestLogHandler(t *testing.T) {
 	}
 
 	for _, logHandler := range handlers {
-		req := httptest.NewRequest(http.MethodGet, "http://localhost", nil)
+		req := httptest.NewRequest(http.MethodGet, "http://localhost:888/index?query=xxx", nil)
 		handler := logHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			r.Context().Value(internal.LogContext).(*internal.LogCollector).Append("anything")
 			w.Header().Set("X-Test", "test")
@@ -51,7 +72,7 @@ func TestLogHandlerSlow(t *testing.T) {
 	}
 
 	for _, logHandler := range handlers {
-		req := httptest.NewRequest(http.MethodGet, "http://localhost", nil)
+		req := httptest.NewRequest(http.MethodGet, "http://localhost:888/index?query=xxx", nil)
 		handler := logHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			time.Sleep(slowThreshold + time.Millisecond*50)
 		}))
