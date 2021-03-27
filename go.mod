@@ -5,6 +5,7 @@ go 1.15
 require (
 	github.com/ClickHouse/clickhouse-go v1.4.3
 	github.com/DATA-DOG/go-sqlmock v1.4.1
+	github.com/HdrHistogram/hdrhistogram-go v1.1.0 // indirect
 	github.com/alicebob/miniredis/v2 v2.14.1
 	github.com/aliyun/aliyun-log-go-sdk v0.1.18
 	github.com/antlr/antlr4 v0.0.0-20210105212045-464bcbc32de2
@@ -36,12 +37,14 @@ require (
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/olekukonko/tablewriter v0.0.4
 	github.com/onsi/gomega v1.5.0 // indirect
-	github.com/pkg/errors v0.9.1
+	github.com/opentracing/opentracing-go v1.1.0
 	github.com/prometheus/client_golang v1.5.1
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/spaolacci/murmur3 v1.1.0
-	github.com/stretchr/testify v1.5.1
+	github.com/stretchr/testify v1.7.0
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20171017195756-830351dc03c6 // indirect
+	github.com/uber/jaeger-client-go v2.25.0+incompatible
+	github.com/uber/jaeger-lib v2.4.0+incompatible // indirect
 	github.com/urfave/cli v1.22.5
 	github.com/xwb1989/sqlparser v0.0.0-20180606152119-120387863bf2
 	go.etcd.io/etcd v0.0.0-20200402134248-51bdeb39e698

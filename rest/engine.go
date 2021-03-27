@@ -3,6 +3,8 @@ package rest
 import (
 	"errors"
 	"fmt"
+	"github.com/opentracing/opentracing-go"
+	"github.com/tal-tech/go-zero/core/trace/alijaeger"
 	"net/http"
 	"time"
 
@@ -105,19 +107,38 @@ func (s *engine) bindFeaturedRoutes(router httpx.Router, fr featuredRoutes, metr
 
 func (s *engine) bindRoute(fr featuredRoutes, router httpx.Router, metrics *stat.Metrics,
 	route Route, verifier func(chain alice.Chain) alice.Chain) error {
-	chain := alice.New(
-		handler.TracingHandler,
-		s.getLogHandler(),
-		handler.MaxConns(s.conf.MaxConns),
-		handler.BreakerHandler(route.Method, route.Path, metrics),
-		handler.SheddingHandler(s.getShedder(fr.priority), metrics),
-		handler.TimeoutHandler(time.Duration(s.conf.Timeout)*time.Millisecond),
-		handler.RecoverHandler,
-		handler.MetricHandler(metrics),
-		handler.PromethousHandler(route.Path),
-		handler.MaxBytesHandler(s.conf.MaxBytes),
-		handler.GunzipHandler,
-	)
+	var chain alice.Chain
+
+	if opentracing.IsGlobalTracerRegistered() {
+		chain = alice.New(
+			alijaeger.AliTracingHandler,
+			s.getLogHandler(),
+			handler.MaxConns(s.conf.MaxConns),
+			handler.BreakerHandler(route.Method, route.Path, metrics),
+			handler.SheddingHandler(s.getShedder(fr.priority), metrics),
+			handler.TimeoutHandler(time.Duration(s.conf.Timeout)*time.Millisecond),
+			handler.RecoverHandler,
+			handler.MetricHandler(metrics),
+			handler.PromethousHandler(route.Path),
+			handler.MaxBytesHandler(s.conf.MaxBytes),
+			handler.GunzipHandler,
+		)
+	} else {
+		chain = alice.New(
+			handler.TracingHandler,
+			s.getLogHandler(),
+			handler.MaxConns(s.conf.MaxConns),
+			handler.BreakerHandler(route.Method, route.Path, metrics),
+			handler.SheddingHandler(s.getShedder(fr.priority), metrics),
+			handler.TimeoutHandler(time.Duration(s.conf.Timeout)*time.Millisecond),
+			handler.RecoverHandler,
+			handler.MetricHandler(metrics),
+			handler.PromethousHandler(route.Path),
+			handler.MaxBytesHandler(s.conf.MaxBytes),
+			handler.GunzipHandler,
+		)
+	}
+
 	chain = s.appendAuthHandler(fr, chain, verifier)
 
 	for _, middleware := range s.middlewares {

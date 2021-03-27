@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"github.com/opentracing/opentracing-go"
+	"github.com/tal-tech/go-zero/core/trace/alijaeger"
 	"net"
 
 	"github.com/tal-tech/go-zero/core/proc"
@@ -51,12 +53,18 @@ func (s *rpcServer) Start(register RegisterFn) error {
 		return err
 	}
 
-	unaryInterceptors := []grpc.UnaryServerInterceptor{
-		serverinterceptors.UnaryTracingInterceptor(s.name),
+	unaryInterceptors := make([]grpc.UnaryServerInterceptor, 0, 10)
+	if opentracing.IsGlobalTracerRegistered() {
+		unaryInterceptors = append(unaryInterceptors, alijaeger.AliUnaryTracingInterceptor())
+	} else {
+		unaryInterceptors = append(unaryInterceptors, serverinterceptors.UnaryTracingInterceptor(s.name))
+	}
+
+	unaryInterceptors = append(unaryInterceptors,
 		serverinterceptors.UnaryCrashInterceptor(),
 		serverinterceptors.UnaryStatInterceptor(s.metrics),
-		serverinterceptors.UnaryPrometheusInterceptor(),
-	}
+		serverinterceptors.UnaryPrometheusInterceptor())
+
 	unaryInterceptors = append(unaryInterceptors, s.unaryInterceptors...)
 	streamInterceptors := []grpc.StreamServerInterceptor{
 		serverinterceptors.StreamCrashInterceptor,
