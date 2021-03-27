@@ -19,6 +19,7 @@ import (
 	"github.com/tal-tech/go-zero/tools/goctl/configgen"
 	"github.com/tal-tech/go-zero/tools/goctl/docker"
 	"github.com/tal-tech/go-zero/tools/goctl/kube"
+	"github.com/tal-tech/go-zero/tools/goctl/model/mongo"
 	model "github.com/tal-tech/go-zero/tools/goctl/model/sql/command"
 	"github.com/tal-tech/go-zero/tools/goctl/plugin"
 	rpc "github.com/tal-tech/go-zero/tools/goctl/rpc/cli"
@@ -28,7 +29,7 @@ import (
 )
 
 var (
-	BuildVersion = "1.1.5"
+	buildVersion = "1.1.6"
 	commands     = []cli.Command{
 		{
 			Name:   "upgrade",
@@ -49,7 +50,7 @@ var (
 				{
 					Name:   "new",
 					Usage:  "fast create api service",
-					Action: new.NewService,
+					Action: new.CreateServiceCommand,
 				},
 				{
 					Name:  "format",
@@ -88,6 +89,11 @@ var (
 						cli.StringFlag{
 							Name:  "dir",
 							Usage: "the target dir",
+						},
+						cli.StringFlag{
+							Name:     "o",
+							Required: false,
+							Usage:    "the output markdown directory",
 						},
 					},
 					Action: docgen.DocCommand,
@@ -332,7 +338,7 @@ var (
 							Usage: "whether the command execution environment is from idea plugin. [optional]",
 						},
 					},
-					Action: rpc.RpcNew,
+					Action: rpc.RPCNew,
 				},
 				{
 					Name:  "template",
@@ -343,7 +349,7 @@ var (
 							Usage: "the target path of proto",
 						},
 					},
-					Action: rpc.RpcTemplate,
+					Action: rpc.RPCTemplate,
 				},
 				{
 					Name:  "proto",
@@ -370,7 +376,7 @@ var (
 							Usage: "whether the command execution environment is from idea plugin. [optional]",
 						},
 					},
-					Action: rpc.Rpc,
+					Action: rpc.RPC,
 				},
 			},
 		},
@@ -442,6 +448,29 @@ var (
 						},
 					},
 				},
+				{
+					Name:  "mongo",
+					Usage: `generate mongo model`,
+					Flags: []cli.Flag{
+						cli.StringSliceFlag{
+							Name:  "type, t",
+							Usage: "specified model type name",
+						},
+						cli.BoolFlag{
+							Name:  "cache, c",
+							Usage: "generate code with cache [optional]",
+						},
+						cli.StringFlag{
+							Name:  "dir, d",
+							Usage: "the target dir",
+						},
+						cli.StringFlag{
+							Name:  "style",
+							Usage: "the file naming format, see [https://github.com/tal-tech/go-zero/tree/master/tools/goctl/config/readme.md]",
+						},
+					},
+					Action: mongo.Action,
+				},
 			},
 		},
 		{
@@ -505,7 +534,7 @@ func main() {
 
 	app := cli.NewApp()
 	app.Usage = "a cli tool to generate code"
-	app.Version = fmt.Sprintf("%s %s/%s", BuildVersion, runtime.GOOS, runtime.GOARCH)
+	app.Version = fmt.Sprintf("%s %s/%s", buildVersion, runtime.GOOS, runtime.GOARCH)
 	app.Commands = commands
 	// cli already print error messages
 	if err := app.Run(os.Args); err != nil {

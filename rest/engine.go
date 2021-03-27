@@ -21,6 +21,7 @@ import (
 // use 1000m to represent 100%
 const topCpuUsage = 1000
 
+// ErrSignatureConfig is an error that indicates bad config for signature.
 var ErrSignatureConfig = errors.New("bad config for Signature")
 
 type engine struct {
@@ -119,7 +120,7 @@ func (s *engine) bindRoute(fr featuredRoutes, router httpx.Router, metrics *stat
 			handler.TimeoutHandler(time.Duration(s.conf.Timeout)*time.Millisecond),
 			handler.RecoverHandler,
 			handler.MetricHandler(metrics),
-			handler.PromethousHandler(route.Path),
+			handler.PrometheusHandler(route.Path),
 			handler.MaxBytesHandler(s.conf.MaxBytes),
 			handler.GunzipHandler,
 		)
@@ -133,7 +134,7 @@ func (s *engine) bindRoute(fr featuredRoutes, router httpx.Router, metrics *stat
 			handler.TimeoutHandler(time.Duration(s.conf.Timeout)*time.Millisecond),
 			handler.RecoverHandler,
 			handler.MetricHandler(metrics),
-			handler.PromethousHandler(route.Path),
+			handler.PrometheusHandler(route.Path),
 			handler.MaxBytesHandler(s.conf.MaxBytes),
 			handler.GunzipHandler,
 		)
@@ -176,15 +177,16 @@ func (s *engine) createMetrics() *stat.Metrics {
 func (s *engine) getLogHandler() func(http.Handler) http.Handler {
 	if s.conf.Verbose {
 		return handler.DetailedLogHandler
-	} else {
-		return handler.LogHandler
 	}
+
+	return handler.LogHandler
 }
 
 func (s *engine) getShedder(priority bool) load.Shedder {
 	if priority && s.priorityShedder != nil {
 		return s.priorityShedder
 	}
+
 	return s.shedder
 }
 
@@ -198,11 +200,11 @@ func (s *engine) signatureVerifier(signature signatureSetting) (func(chain alice
 	if len(signature.PrivateKeys) == 0 {
 		if signature.Strict {
 			return nil, ErrSignatureConfig
-		} else {
-			return func(chain alice.Chain) alice.Chain {
-				return chain
-			}, nil
 		}
+
+		return func(chain alice.Chain) alice.Chain {
+			return chain
+		}, nil
 	}
 
 	decrypters := make(map[string]codec.RsaDecrypter)
@@ -221,10 +223,10 @@ func (s *engine) signatureVerifier(signature signatureSetting) (func(chain alice
 		if s.unsignedCallback != nil {
 			return chain.Append(handler.ContentSecurityHandler(
 				decrypters, signature.Expiry, signature.Strict, s.unsignedCallback))
-		} else {
-			return chain.Append(handler.ContentSecurityHandler(
-				decrypters, signature.Expiry, signature.Strict))
 		}
+
+		return chain.Append(handler.ContentSecurityHandler(
+			decrypters, signature.Expiry, signature.Strict))
 	}, nil
 }
 

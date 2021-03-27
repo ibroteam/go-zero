@@ -103,17 +103,9 @@ func genComponents(dir, packetName string, api *spec.ApiSpec) error {
 }
 
 func (c *componentsContext) createComponent(dir, packetName string, ty spec.Type) error {
-	defineStruct, ok := ty.(spec.DefineStruct)
-	if !ok {
-		return errors.New("unsupported type %s" + ty.Name())
-	}
-
-	for _, item := range c.requestTypes {
-		if item.Name() == defineStruct.Name() {
-			if len(defineStruct.GetFormMembers())+len(defineStruct.GetBodyMembers()) == 0 {
-				return nil
-			}
-		}
+	defineStruct, done, err := c.checkStruct(ty)
+	if done {
+		return err
 	}
 
 	modelFile := util.Title(ty.Name()) + ".java"
@@ -181,6 +173,22 @@ func (c *componentsContext) createComponent(dir, packetName string, ty spec.Type
 	return err
 }
 
+func (c *componentsContext) checkStruct(ty spec.Type) (spec.DefineStruct, bool, error) {
+	defineStruct, ok := ty.(spec.DefineStruct)
+	if !ok {
+		return spec.DefineStruct{}, true, errors.New("unsupported type %s" + ty.Name())
+	}
+
+	for _, item := range c.requestTypes {
+		if item.Name() == defineStruct.Name() {
+			if len(defineStruct.GetFormMembers())+len(defineStruct.GetBodyMembers()) == 0 {
+				return spec.DefineStruct{}, true, nil
+			}
+		}
+	}
+	return defineStruct, false, nil
+}
+
 func (c *componentsContext) buildProperties(defineStruct spec.DefineStruct) (string, error) {
 	var builder strings.Builder
 	if err := c.writeType(&builder, defineStruct); err != nil {
@@ -216,7 +224,7 @@ func (c *componentsContext) writeMembers(writer io.Writer, tp spec.Type, indent 
 		if ok {
 			return c.writeMembers(writer, pointType.Type, indent)
 		}
-		return errors.New(fmt.Sprintf("type %s not supported", tp.Name()))
+		return fmt.Errorf("type %s not supported", tp.Name())
 	}
 
 	for _, member := range definedType.Members {
