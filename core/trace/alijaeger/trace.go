@@ -55,20 +55,6 @@ func (aj *AliJaeger) Trace(ctx context.Context, name string, fn func(ctx context
 	return fn(c, span)
 }
 
-func (aj *AliJaeger) TraceMysql(ctx context.Context, sql, name string, fn func(ctx context.Context, span opentracing.Span) error) error {
-	span, c := opentracing.StartSpanFromContext(ctx, sql)
-	ext.DBStatement.Set(span, sql)
-	ext.DBType.Set(span, "mysql")
-	defer span.Finish()
-	return fn(c, span)
-}
-
-func (aj *AliJaeger) TraceRedis(ctx context.Context, name string, fn func(ctx context.Context, span opentracing.Span) error) error {
-	span, c := opentracing.StartSpanFromContext(ctx, name)
-	defer span.Finish()
-	return fn(c, span)
-}
-
 // AliTracingHandler http中间件
 func AliTracingHandler(next http.Handler) http.Handler {
 	tracer := opentracing.GlobalTracer()
@@ -85,12 +71,38 @@ func AliTracingHandler(next http.Handler) http.Handler {
 		ext.HTTPMethod.Set(span, r.Method)
 		ext.HTTPUrl.Set(span, r.RequestURI)
 
-		//span.Tracer().Inject(ctx, opentracing.HTTPHeaders, r.Header)
-		next.ServeHTTP(w, r.WithContext(opentracing.ContextWithSpan(r.Context(), span)))
+		newRequest := r.WithContext(opentracing.ContextWithSpan(r.Context(), span))
+		next.ServeHTTP(w, newRequest)
 	})
 }
 
-// AliUnaryTracingInterceptor rpc中间件
+// AliTracingInterceptor client端trace中间件
+func AliTracingInterceptor(ctx context.Context, method string, req, reply interface{},
+	cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+
+	var parentSC opentracing.SpanContext
+	parentSpan := opentracing.SpanFromContext(ctx)
+	if parentSpan != nil {
+		parentSC = parentSpan.Context()
+	}
+
+	span := opentracing.StartSpan(method, opentracing.ChildOf(parentSC), gRPCComponentTag, ext.SpanKindRPCClient)
+	defer span.Finish()
+
+	md, ok := metadata.FromOutgoingContext(ctx)
+	if !ok {
+		md = metadata.New(nil)
+	} else {
+		md = md.Copy()
+	}
+
+	opentracing.GlobalTracer().Inject(span.Context(), opentracing.TextMap, metadataReaderWriter{md})
+	newCtx := metadata.NewOutgoingContext(ctx, md)
+
+	return invoker(newCtx, method, req, reply, cc, opts...)
+}
+
+// AliUnaryTracingInterceptor server端trace中间件
 func AliUnaryTracingInterceptor() grpc.UnaryServerInterceptor {
 	tracer := opentracing.GlobalTracer()
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo,
@@ -104,11 +116,12 @@ func AliUnaryTracingInterceptor() grpc.UnaryServerInterceptor {
 		if err != nil && err != opentracing.ErrSpanContextNotFound {
 			resp, err = handler(ctx, req)
 		} else {
-			span := tracer.StartSpan(info.FullMethod, ext.RPCServerOption(sc), gRPCComponentTag)
+			span := tracer.StartSpan(info.FullMethod, ext.RPCServerOption(sc), gRPCComponentTag, ext.SpanKindRPCServer)
 			defer span.Finish()
 
 			resp, err = handler(opentracing.ContextWithSpan(ctx, span), req)
 			if err != nil {
+				ext.Error.Set(span, true)
 				span.SetTag("error", err)
 			}
 		}

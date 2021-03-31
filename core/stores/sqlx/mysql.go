@@ -13,6 +13,12 @@ func NewMysql(datasource string, opts ...SqlOption) SqlConn {
 	return NewSqlConn(mysqlDriverName, datasource, opts...)
 }
 
+// NewMysql returns a mysql connection.
+func NewMysqlCtx(datasource string, opts ...SqlOptionCtx) SqlConnCtx {
+	opts = append(opts, withMysqlAcceptableCtx())
+	return NewSqlConnCtx(mysqlDriverName, datasource, opts...)
+}
+
 func mysqlAcceptable(err error) bool {
 	if err == nil {
 		return true
@@ -33,6 +39,12 @@ func mysqlAcceptable(err error) bool {
 
 func withMysqlAcceptable() SqlOption {
 	return func(conn *commonSqlConn) {
+		conn.accept = mysqlAcceptable
+	}
+}
+
+func withMysqlAcceptableCtx() SqlOptionCtx {
+	return func(conn *commonSqlConnCtx) {
 		conn.accept = mysqlAcceptable
 	}
 }

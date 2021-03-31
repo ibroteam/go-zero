@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/opentracing/opentracing-go"
+	"github.com/tal-tech/go-zero/core/trace/alijaeger"
 	"github.com/tal-tech/go-zero/zrpc/internal/balancer/p2c"
 	"github.com/tal-tech/go-zero/zrpc/internal/clientinterceptors"
 	"github.com/tal-tech/go-zero/zrpc/internal/resolver"
@@ -63,19 +65,35 @@ func (c *client) buildDialOptions(opts ...ClientOption) []grpc.DialOption {
 		opt(&cliOpts)
 	}
 
-	options := []grpc.DialOption{
-		grpc.WithInsecure(),
-		grpc.WithBlock(),
-		WithUnaryClientInterceptors(
-			clientinterceptors.TracingInterceptor,
-			clientinterceptors.DurationInterceptor,
-			clientinterceptors.BreakerInterceptor,
-			clientinterceptors.PrometheusInterceptor,
-			clientinterceptors.TimeoutInterceptor(cliOpts.Timeout),
-		),
-	}
+	if opentracing.IsGlobalTracerRegistered() {
+		options := []grpc.DialOption{
+			grpc.WithInsecure(),
+			grpc.WithBlock(),
+			WithUnaryClientInterceptors(
+				alijaeger.AliTracingInterceptor,
+				clientinterceptors.DurationInterceptor,
+				clientinterceptors.BreakerInterceptor,
+				clientinterceptors.PrometheusInterceptor,
+				clientinterceptors.TimeoutInterceptor(cliOpts.Timeout),
+			),
+		}
 
-	return append(options, cliOpts.DialOptions...)
+		return append(options, cliOpts.DialOptions...)
+	} else {
+		options := []grpc.DialOption{
+			grpc.WithInsecure(),
+			grpc.WithBlock(),
+			WithUnaryClientInterceptors(
+				clientinterceptors.TracingInterceptor,
+				clientinterceptors.DurationInterceptor,
+				clientinterceptors.BreakerInterceptor,
+				clientinterceptors.PrometheusInterceptor,
+				clientinterceptors.TimeoutInterceptor(cliOpts.Timeout),
+			),
+		}
+
+		return append(options, cliOpts.DialOptions...)
+	}
 }
 
 func (c *client) dial(server string, opts ...ClientOption) error {
