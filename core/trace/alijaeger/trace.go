@@ -2,6 +2,7 @@ package alijaeger
 
 import (
 	"context"
+	"fmt"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/uber/jaeger-client-go"
@@ -58,6 +59,7 @@ func (aj *AliJaeger) Trace(ctx context.Context, name string, fn func(ctx context
 // AliTracingHandler http中间件
 func AliTracingHandler(next http.Handler) http.Handler {
 	tracer := opentracing.GlobalTracer()
+	fmt.Println("init AliTracingHandler")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var span opentracing.Span
 		ctx, err := tracer.Extract(opentracing.HTTPHeaders, r.Header)
@@ -105,6 +107,7 @@ func AliTracingInterceptor(ctx context.Context, method string, req, reply interf
 // AliUnaryTracingInterceptor server端trace中间件
 func AliUnaryTracingInterceptor() grpc.UnaryServerInterceptor {
 	tracer := opentracing.GlobalTracer()
+	fmt.Println("init AliUnaryTracingInterceptor")
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler) (resp interface{}, err error) {
 		md, ok := metadata.FromIncomingContext(ctx)
