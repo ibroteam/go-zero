@@ -8,13 +8,15 @@ import (
 	"fmt"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
+	"github.com/tal-tech/go-zero/core/trace/alijaeger"
 )
 
 func execWithCtx(ctx context.Context, conn sessionConn, q string, args ...interface{}) (sql.Result, error) {
 	stmt := formatForPrint(q, args)
 	span, _ := opentracing.StartSpanFromContext(ctx, "db")
 	defer span.Finish()
-	ext.DBStatement.Set(span, stmt)
+	ext.DBStatement.Set(span, q)
+	span.SetTag(alijaeger.TagStmtArgs, stmt)
 
 	result, err := conn.Exec(q, args...)
 	if err != nil {
@@ -41,7 +43,8 @@ func queryWithCtx(ctx context.Context, conn sessionConn, scanner func(*sql.Rows)
 	stmt := fmt.Sprint(args...)
 	span, _ := opentracing.StartSpanFromContext(ctx, "db")
 	defer span.Finish()
-	ext.DBStatement.Set(span, stmt)
+	ext.DBStatement.Set(span, q)
+	span.SetTag(alijaeger.TagStmtArgs, stmt)
 
 	rows, err := conn.Query(q, args...)
 	if err != nil {

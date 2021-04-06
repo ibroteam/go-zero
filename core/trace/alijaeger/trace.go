@@ -2,7 +2,6 @@ package alijaeger
 
 import (
 	"context"
-	"fmt"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/uber/jaeger-client-go"
@@ -16,6 +15,7 @@ import (
 
 const (
 	EndpointKey = "Jaeger"
+	TagStmtArgs = "__sql_Param"
 )
 
 type AliJaeger struct {
@@ -59,7 +59,6 @@ func (aj *AliJaeger) Trace(ctx context.Context, name string, fn func(ctx context
 // AliTracingHandler http中间件
 func AliTracingHandler(next http.Handler) http.Handler {
 	tracer := opentracing.GlobalTracer()
-	fmt.Println("init AliTracingHandler")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var span opentracing.Span
 		ctx, err := tracer.Extract(opentracing.HTTPHeaders, r.Header)
@@ -72,6 +71,9 @@ func AliTracingHandler(next http.Handler) http.Handler {
 		defer span.Finish()
 		ext.HTTPMethod.Set(span, r.Method)
 		ext.HTTPUrl.Set(span, r.RequestURI)
+
+		// 注入TraceId到http response header,供测试使用
+		tracer.Inject(span.Context(), opentracing.HTTPHeaders, w.Header())
 
 		newRequest := r.WithContext(opentracing.ContextWithSpan(r.Context(), span))
 		next.ServeHTTP(w, newRequest)
@@ -107,7 +109,6 @@ func AliTracingInterceptor(ctx context.Context, method string, req, reply interf
 // AliUnaryTracingInterceptor server端trace中间件
 func AliUnaryTracingInterceptor() grpc.UnaryServerInterceptor {
 	tracer := opentracing.GlobalTracer()
-	fmt.Println("init AliUnaryTracingInterceptor")
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler) (resp interface{}, err error) {
 		md, ok := metadata.FromIncomingContext(ctx)
