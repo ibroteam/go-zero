@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const endpoint = "http://tracing-analysis-dc-sz.aliyuncs.com/adapt_jcbj57tc59@49deac3fa650936_jcbj57tc59@53df7ad2afe8301/api/traces"
+const endpoint = "<endpoint>"
 
 func TestAliJaeger(t *testing.T) {
 	aj := NewAliJaeger("test", endpoint)
