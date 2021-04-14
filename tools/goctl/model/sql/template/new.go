@@ -2,9 +2,9 @@ package template
 
 // New defines an template for creating model instance
 var New = `
-func New{{.upperStartCamelObject}}Model(conn sqlx.SqlConn{{if .withCache}}, c cache.CacheConf{{end}}) {{.upperStartCamelObject}}Model {
+func New{{.upperStartCamelObject}}Model({{if .withCache}}conn sqlx.SqlConnCtx, c cache.CacheConf{{else}}conn sqlx.SqlConnCtx{{end}}) {{.upperStartCamelObject}}Model {
 	return &default{{.upperStartCamelObject}}Model{
-		{{if .withCache}}CachedConn: sqlc.NewConn(conn, c){{else}}conn:conn{{end}},
+		{{if .withCache}}CachedConnCtx: sqlc.NewConnCtx(conn, c, cache.WithExpiry(time.Minute), cache.WithNotFoundExpiry(time.Minute)){{else}}conn:conn{{end}},
 		table:      "{{.table}}",
 	}
 }

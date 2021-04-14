@@ -8,7 +8,7 @@ type (
 	}
 
 	default{{.upperStartCamelObject}}Model struct {
-		{{if .withCache}}sqlc.CachedConn{{else}}conn sqlx.SqlConn{{end}}
+		{{if .withCache}}sqlc.CachedConnCtx{{else}}conn sqlx.SqlConnCtx{{end}}
 		table string
 	}
 
