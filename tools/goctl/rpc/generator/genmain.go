@@ -8,7 +8,6 @@ import (
 	conf "github.com/tal-tech/go-zero/tools/goctl/config"
 	"github.com/tal-tech/go-zero/tools/goctl/rpc/parser"
 	"github.com/tal-tech/go-zero/tools/goctl/util"
-	"github.com/tal-tech/go-zero/tools/goctl/util/format"
 	"github.com/tal-tech/go-zero/tools/goctl/util/stringx"
 )
 
@@ -32,6 +31,13 @@ func main() {
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
+
+    // 开启open trace(性能损耗较大，仅测试环境开启)
+	if c.IsTest() {
+		aj := alijaeger.NewAliJaeger(c.Name, c.Jaeger)
+		defer aj.SafeStop()
+	}
+
 	ctx := svc.NewServiceContext(c)
 	srv := server.New{{.serviceNew}}Server(ctx)
 
@@ -47,12 +53,13 @@ func main() {
 
 // GenMain generates the main file of the rpc service, which is an rpc service program call entry
 func (g *DefaultGenerator) GenMain(ctx DirContext, proto parser.Proto, cfg *conf.Config) error {
-	mainFilename, err := format.FileNamingFormat(cfg.NamingFormat, ctx.GetServiceName().Source())
-	if err != nil {
-		return err
-	}
+	//mainFilename, err := format.FileNamingFormat(cfg.NamingFormat, ctx.GetServiceName().Source())
+	//if err != nil {
+	//	return err
+	//}
 
-	fileName := filepath.Join(ctx.GetMain().Filename, fmt.Sprintf("%v.go", mainFilename))
+	//fileName := filepath.Join(ctx.GetMain().Filename, fmt.Sprintf("%v.go", mainFilename))
+	fileName := filepath.Join(ctx.GetMain().Filename, "main.go")
 	imports := make([]string, 0)
 	pbImport := fmt.Sprintf(`"%v"`, ctx.GetPb().Package)
 	svcImport := fmt.Sprintf(`"%v"`, ctx.GetSvc().Package)

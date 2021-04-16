@@ -120,7 +120,7 @@ func (s *engine) bindRoute(fr featuredRoutes, router httpx.Router, metrics *stat
 			handler.TimeoutHandler(time.Duration(s.conf.Timeout)*time.Millisecond),
 			handler.RecoverHandler,
 			handler.MetricHandler(metrics),
-			handler.PrometheusHandler(route.Path),
+			//handler.PrometheusHandler(route.Path),
 			handler.MaxBytesHandler(s.conf.MaxBytes),
 			handler.GunzipHandler,
 		)
@@ -134,7 +134,7 @@ func (s *engine) bindRoute(fr featuredRoutes, router httpx.Router, metrics *stat
 			handler.TimeoutHandler(time.Duration(s.conf.Timeout)*time.Millisecond),
 			handler.RecoverHandler,
 			handler.MetricHandler(metrics),
-			handler.PrometheusHandler(route.Path),
+			//handler.PrometheusHandler(route.Path),
 			handler.MaxBytesHandler(s.conf.MaxBytes),
 			handler.GunzipHandler,
 		)

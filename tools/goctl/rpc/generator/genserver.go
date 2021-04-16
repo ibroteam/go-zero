@@ -39,8 +39,27 @@ func New{{.server}}Server(svcCtx *svc.ServiceContext) *{{.server}}Server {
 	functionTemplate = `
 {{if .hasComment}}{{.comment}}{{end}}
 func (s *{{.server}}Server) {{.method}} (ctx context.Context, in {{.request}}) ({{.response}}, error) {
-	l := logic.New{{.logicName}}(ctx,s.svcCtx)
+	l := logic.New{{.logicName}}(ctx, s.svcCtx)
 	return l.{{.method}}(in)
+}
+`
+
+	functionStreamTemplate = `
+{{if .hasComment}}{{.comment}}{{end}}
+func (s *{{.server}}Server) {{.method}} (in {{.request}}) error {
+	l := logic.New{{.logicName}}(in.Context(), s.svcCtx)
+	req, err := in.Recv()
+	if err != nil {
+		return err
+	}
+
+	resp, err := l.SignIn(req)
+	if err != nil {
+		return err
+	}
+
+	in.Send(resp)
+	return nil
 }
 `
 )
@@ -83,9 +102,22 @@ func (g *DefaultGenerator) GenServer(ctx DirContext, proto parser.Proto, cfg *co
 }
 
 func (g *DefaultGenerator) genFunctions(goPackage string, service parser.Service) ([]string, error) {
-	var functionList []string
+	var (
+		err          error
+		text         string
+		request      string
+		functionList []string
+	)
+
 	for _, rpc := range service.RPC {
-		text, err := util.LoadTemplate(category, serverFuncTemplateFile, functionTemplate)
+		if rpc.StreamsReturns {
+			text, err = util.LoadTemplate(category, serverFuncTemplateFile, functionStreamTemplate)
+			request = fmt.Sprintf("%s.%s_%sServer", goPackage, stringx.From(service.Name).ToCamel(), parser.CamelCase(rpc.Name))
+		} else {
+			text, err = util.LoadTemplate(category, serverFuncTemplateFile, functionTemplate)
+			request = fmt.Sprintf("*%s.%s", goPackage, parser.CamelCase(rpc.RequestType))
+		}
+
 		if err != nil {
 			return nil, err
 		}
@@ -95,7 +127,7 @@ func (g *DefaultGenerator) genFunctions(goPackage string, service parser.Service
 			"server":     stringx.From(service.Name).ToCamel(),
 			"logicName":  fmt.Sprintf("%sLogic", stringx.From(rpc.Name).ToCamel()),
 			"method":     parser.CamelCase(rpc.Name),
-			"request":    fmt.Sprintf("*%s.%s", goPackage, parser.CamelCase(rpc.RequestType)),
+			"request":    request,
 			"response":   fmt.Sprintf("*%s.%s", goPackage, parser.CamelCase(rpc.ReturnsType)),
 			"hasComment": len(comment) > 0,
 			"comment":    comment,

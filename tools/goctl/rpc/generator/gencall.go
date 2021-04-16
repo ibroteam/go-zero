@@ -50,13 +50,29 @@ func New{{.serviceName}}(cli zrpc.Client) {{.serviceName}} {
 `
 
 	callInterfaceFunctionTemplate = `{{if .hasComment}}{{.comment}}
-{{end}}{{.method}}(ctx context.Context,in *{{.pbRequest}}) (*{{.pbResponse}},error)`
+{{end}}{{.method}}(ctx context.Context, in *{{.pbRequest}}) (*{{.pbResponse}},error)`
 
 	callFunctionTemplate = `
 {{if .hasComment}}{{.comment}}{{end}}
-func (m *default{{.serviceName}}) {{.method}}(ctx context.Context,in *{{.pbRequest}}) (*{{.pbResponse}}, error) {
+func (m *default{{.serviceName}}) {{.method}}(ctx context.Context, in *{{.pbRequest}}) (*{{.pbResponse}}, error) {
 	client := {{.package}}.New{{.rpcServiceName}}Client(m.cli.Conn())
 	return client.{{.method}}(ctx, in)
+}
+`
+
+	callStreamFunctionTemplate = `
+{{if .hasComment}}{{.comment}}{{end}}
+func (m *default{{.serviceName}}) {{.method}}(ctx context.Context, in *{{.pbRequest}}) (*{{.pbResponse}}, error) {
+	client := {{.package}}.New{{.rpcServiceName}}Client(m.cli.Conn())
+	c, err := client.{{.method}}(ctx)
+	if err != nil {
+		return nil, err
+	}
+	err = c.Send(in)
+	if err != nil {
+		return nil, err
+	}
+	return c.Recv()
 }
 `
 )
@@ -108,9 +124,19 @@ func (g *DefaultGenerator) GenCall(ctx DirContext, proto parser.Proto, cfg *conf
 }
 
 func (g *DefaultGenerator) genFunction(goPackage string, service parser.Service) ([]string, error) {
+	var (
+		err  error
+		text string
+	)
+
 	functions := make([]string, 0)
 	for _, rpc := range service.RPC {
-		text, err := util.LoadTemplate(category, callFunctionTemplateFile, callFunctionTemplate)
+		if rpc.StreamsRequest {
+			text, err = util.LoadTemplate(category, callStreamFunctionTemplateFile, callStreamFunctionTemplate)
+		} else {
+			text, err = util.LoadTemplate(category, callFunctionTemplateFile, callFunctionTemplate)
+		}
+
 		if err != nil {
 			return nil, err
 		}

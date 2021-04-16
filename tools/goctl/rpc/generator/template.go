@@ -12,6 +12,7 @@ const (
 	callTemplateFile                  = "call.tpl"
 	callInterfaceFunctionTemplateFile = "call-interface-func.tpl"
 	callFunctionTemplateFile          = "call-func.tpl"
+	callStreamFunctionTemplateFile    = "call-stream-func.tpl"
 	configTemplateFileFile            = "config.tpl"
 	etcTemplateFileFile               = "etc.tpl"
 	logicTemplateFileFile             = "logic.tpl"
@@ -27,6 +28,7 @@ var templates = map[string]string{
 	callTemplateFile:                  callTemplateText,
 	callInterfaceFunctionTemplateFile: callInterfaceFunctionTemplate,
 	callFunctionTemplateFile:          callFunctionTemplate,
+	callStreamFunctionTemplateFile:    callStreamFunctionTemplate,
 	configTemplateFileFile:            configTemplate,
 	etcTemplateFileFile:               etcTemplate,
 	logicTemplateFileFile:             logicTemplate,

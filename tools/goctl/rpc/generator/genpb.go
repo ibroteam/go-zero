@@ -27,8 +27,9 @@ func (g *DefaultGenerator) GenPb(ctx DirContext, protoImportPath []string, proto
 	} else {
 		cw.WriteString(" --go_out=plugins=grpc:" + dir.Filename)
 	}
+
 	command := cw.String()
-	g.log.Debug(command)
+	g.log.Debug("%s", command)
 	_, err := execx.Run(command, "")
 	return err
 }

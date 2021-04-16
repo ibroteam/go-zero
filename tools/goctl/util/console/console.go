@@ -117,7 +117,7 @@ func (i *ideaConsole) Fatalln(format string, a ...interface{}) {
 }
 
 func (i *ideaConsole) MarkDone() {
-	i.Success("Done.")
+	i.Success("%s", "Done.")
 }
 
 func (i *ideaConsole) Must(err error) {

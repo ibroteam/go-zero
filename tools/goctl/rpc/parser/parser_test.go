@@ -16,6 +16,7 @@ func TestDefaultProtoParse(t *testing.T) {
 		ip := data.Import[0]
 		return ip.Filename
 	}())
+
 	assert.Equal(t, "test", data.Package.Name)
 	assert.Equal(t, true, data.GoPackage == "go")
 	assert.Equal(t, true, data.PbPackage == "_go")

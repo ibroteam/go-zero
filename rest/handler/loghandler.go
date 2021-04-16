@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"strconv"
@@ -127,7 +128,8 @@ func DetailedLogHandler(next http.Handler) http.Handler {
 		}, &buf)
 
 		var dup io.ReadCloser
-		r.Body, dup = iox.DupReadCloser(r.Body)
+		tee := io.TeeReader(r.Body, &buf)
+		r.Body, dup = ioutil.NopCloser(tee), ioutil.NopCloser(&buf)
 		next.ServeHTTP(lrw, r.WithContext(context.WithValue(r.Context(), internal.LogContext, logs)))
 		r.Body = dup
 		logDetails(r, lrw, timer, logs)
@@ -175,12 +177,6 @@ func logBrief(r *http.Request, code int, timer *utils.ElapsedTimer, logs *intern
 		simpleDumpRequest(r, &buf)
 	}
 
-	body := logs.Flush()
-	if len(body) > 0 {
-		buf.WriteString("\n")
-		buf.WriteString(body)
-	}
-
 	if ok {
 		logx.WithContext(r.Context()).Info(buf.String())
 	} else {
@@ -193,23 +189,11 @@ func logDetails(r *http.Request, response *detailLoggedResponseWriter, timer *ut
 	var buf bytes.Buffer
 	duration := timer.Duration()
 
-	buf.WriteString(strconv.Itoa(response.writer.code))
-	buf.WriteString(" - ")
-	buf.WriteString(httpx.GetRemoteAddr(r))
-	buf.WriteString(" - ")
-	buf.WriteString(duration.String())
-	buf.WriteString("\n")
-
 	simpleDumpRequest(r, &buf)
 
 	if duration > slowThreshold {
 		logx.WithContext(r.Context()).Slowf("[HTTP] %d - %s - slowcall(%s)\n=> %s\n",
 			response.writer.code, r.RemoteAddr, timex.ReprOfDuration(duration), dumpRequest(r))
-	}
-
-	body := logs.Flush()
-	if len(body) > 0 {
-		buf.WriteString(body)
 	}
 
 	respBuf := response.buf.Bytes()

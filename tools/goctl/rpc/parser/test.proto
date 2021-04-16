@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package test;
+package base_test;
 option go_package = "go";
 
 import "base.proto";
@@ -16,5 +16,5 @@ enum TestEnum {
 }
 
 service TestService{
-  rpc TestRpcOne (TestReq)returns(TestReply);
+  rpc TestRpcOne (stream TestReq)returns(stream TestReply);
 }

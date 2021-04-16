@@ -17,6 +17,20 @@ import "github.com/tal-tech/go-zero/zrpc"
 
 type Config struct {
 	zrpc.RpcServerConf
+    Jaeger string
+	Env    string
+}
+
+func (c *Config) IsProd() bool {
+	return c.Env == comm.EnvProd
+}
+
+func (c *Config) IsTest() bool {
+	return c.Env == comm.EnvTest
+}
+
+func (c *Config) IsDev() bool {
+	return c.Env == comm.EnvDev
 }
 `
 
