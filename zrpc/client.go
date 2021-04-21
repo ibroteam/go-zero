@@ -1,7 +1,6 @@
 package zrpc
 
 import (
-	"log"
 	"time"
 
 	"github.com/tal-tech/go-zero/core/discov"
@@ -35,7 +34,10 @@ type (
 func MustNewClient(c RpcClientConf, options ...ClientOption) Client {
 	cli, err := NewClient(c, options...)
 	if err != nil {
-		log.Fatal(err)
+		// 2021-04-21 @CRACK by jasyaf
+		// 失败改为panic这样可以被捕获并上报
+		// log.Fatal(err)
+		panic(err)
 	}
 
 	return cli

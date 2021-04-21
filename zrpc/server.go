@@ -1,7 +1,6 @@
 package zrpc
 
 import (
-	"log"
 	"time"
 
 	"github.com/tal-tech/go-zero/core/load"
@@ -23,7 +22,10 @@ type RpcServer struct {
 func MustNewServer(c RpcServerConf, register internal.RegisterFn) *RpcServer {
 	server, err := NewServer(c, register)
 	if err != nil {
-		log.Fatal(err)
+		// 2021-04-21 @CRACK by jasyaf
+		// 失败改为panic这样可以被捕获并上报
+		// log.Fatal(err)
+		panic(err)
 	}
 
 	return server

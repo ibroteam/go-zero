@@ -3,7 +3,6 @@ package conf
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 
@@ -53,6 +52,9 @@ func LoadConfigFromYamlBytes(content []byte, v interface{}) error {
 // MustLoad loads config into v from path, exits on error.
 func MustLoad(path string, v interface{}, opts ...Option) {
 	if err := LoadConfig(path, v, opts...); err != nil {
-		log.Fatalf("error: config file %s, %s", path, err.Error())
+		// 2021-04-21 @CRACK by jasyaf
+		// 失败改为panic这样可以被捕获并上报
+		// log.Fatalf("error: config file %s, %s", path, err.Error())
+		panic(fmt.Sprintf("error: config file %s, %s", path, err.Error()))
 	}
 }
