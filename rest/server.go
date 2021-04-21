@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/tal-tech/go-zero/core/logx"
@@ -31,7 +30,10 @@ type (
 func MustNewServer(c RestConf, opts ...RunOption) *Server {
 	engine, err := NewServer(c, opts...)
 	if err != nil {
-		log.Fatal(err)
+		// 2021-04-21 @CRACK by jasyaf
+		// 失败改为panic这样可以被捕获并上报
+		// log.Fatal(err)
+		panic(err)
 	}
 
 	return engine
