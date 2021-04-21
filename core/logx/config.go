@@ -1,10 +1,6 @@
 package logx
 
-type WaringRobotConf struct {
-	NotifyUrl                 string
-	Secret                    string
-	ReportIntervalLimitMillis int `json:",default=10000"`
-}
+type CustomLoggerFn func(title, content string)
 
 type SlsConf struct {
 	AccessKeyID     string
@@ -18,7 +14,15 @@ type SlsConf struct {
 	SlowStore   string
 	StackStore  string
 	SevereStore string
-	WaringRobot WaringRobotConf `json:"WaringRobot,optional"`
+
+	// 纯粹用于占位传参，下面的配置不通过xml，而是直接在main.go中根据需要传入对应的实现
+	customLoggerFn              CustomLoggerFn `yaml:"-"` // 自定义的日志操作实现，例如钉钉机器人告警
+	customLoggerIntervalLimitMs int            `yaml:"-"` // 设置间隔期，用于控制自定义的日志数量防止太多
+}
+
+func (m *SlsConf) SetCustomLogger(customLoggerFn CustomLoggerFn, customLoggerIntervalLimitMs int) {
+	m.customLoggerIntervalLimitMs = customLoggerIntervalLimitMs
+	m.customLoggerFn = customLoggerFn
 }
 
 // A LogConf is a logging config.

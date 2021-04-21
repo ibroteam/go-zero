@@ -4,8 +4,6 @@ import (
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/aliyun-log-go-sdk/producer"
 	"github.com/gogo/protobuf/proto"
-	"github.com/tal-tech/go-zero/core/dingtalk"
-	"github.com/tal-tech/go-zero/core/dingtalk/message"
 	"github.com/tal-tech/go-zero/core/netx"
 	"github.com/tal-tech/go-zero/core/sysx"
 	"time"
@@ -13,17 +11,15 @@ import (
 
 type slsWriter struct {
 	*limitedExecutor
-	project            string
-	logStore           string
-	source             string
-	topic              string
-	producer           *producer.Producer
-	hasRobotWarning    bool
-	warningRobotUrl    string
-	warningRobotSecret string
+	project        string
+	logStore       string
+	source         string
+	topic          string
+	producer       *producer.Producer
+	customLoggerFn CustomLoggerFn
 }
 
-func newSlsWriter(AppName, Endpoint, Project, AccessKeyID, AccessKeySecret, LogStore string, warn *WaringRobotConf) *slsWriter {
+func newSlsWriter(AppName, Endpoint, Project, AccessKeyID, AccessKeySecret, LogStore string, customLoggerFn CustomLoggerFn, customLoggerIntervalLimitMs int) *slsWriter {
 	localIp := netx.InternalIp()
 
 	producerConfig := producer.GetDefaultProducerConfig()
@@ -39,12 +35,9 @@ func newSlsWriter(AppName, Endpoint, Project, AccessKeyID, AccessKeySecret, LogS
 		topic:    AppName,
 		producer: producerInstance,
 	}
-
-	if warn != nil && len(warn.NotifyUrl) > 0 {
-		l.hasRobotWarning = true
-		l.warningRobotUrl = warn.NotifyUrl
-		l.warningRobotSecret = warn.Secret
-		l.limitedExecutor = newLimitedExecutor(warn.ReportIntervalLimitMillis)
+	if customLoggerFn != nil {
+		l.customLoggerFn = customLoggerFn
+		l.limitedExecutor = newLimitedExecutor(customLoggerIntervalLimitMs)
 	}
 
 	producerInstance.Start()
@@ -67,11 +60,11 @@ func (l *slsWriter) Write(data []byte) (int, error) {
 		},
 	}
 
-	if l.hasRobotWarning {
+	if l.customLoggerFn != nil {
 		l.logOrDiscard(func() {
 			title := "error@" + sysx.Hostname()
 			content := string(data)
-			go dingtalk.SendRobotMessage(l.warningRobotUrl, l.warningRobotSecret, message.NewMarkdownMessageGeneral(title, content))
+			l.customLoggerFn(title, content)
 		})
 	}
 

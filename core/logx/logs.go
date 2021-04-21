@@ -448,22 +448,22 @@ func setupWithSls(c LogConf) error {
 		setupLogLevel(c)
 
 		infoLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret,
-			c.Sls.InfoStore, nil)
+			c.Sls.InfoStore, nil, c.Sls.customLoggerIntervalLimitMs)
 
 		severeLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret,
-			c.Sls.SevereStore, nil)
+			c.Sls.SevereStore, nil, c.Sls.customLoggerIntervalLimitMs)
 
 		slowLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret,
-			c.Sls.SlowStore, nil)
+			c.Sls.SlowStore, nil, c.Sls.customLoggerIntervalLimitMs)
 
 		stackLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret,
-			c.Sls.StackStore, &c.Sls.WaringRobot)
+			c.Sls.StackStore, c.Sls.customLoggerFn, c.Sls.customLoggerIntervalLimitMs)
 
 		statLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret,
-			c.Sls.StatStore, nil)
+			c.Sls.StatStore, nil, c.Sls.customLoggerIntervalLimitMs)
 
 		errorLog = newSlsWriter(c.ServiceName, c.Sls.Endpoint, c.Sls.Project, c.Sls.AccessKeyID, c.Sls.AccessKeySecret,
-			c.Sls.ErrorStore, &c.Sls.WaringRobot)
+			c.Sls.StackStore, c.Sls.customLoggerFn, c.Sls.customLoggerIntervalLimitMs)
 	})
 	return nil
 }
