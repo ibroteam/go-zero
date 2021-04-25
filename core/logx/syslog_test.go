@@ -1,6 +1,7 @@
 package logx
 
 import (
+	"encoding/json"
 	"log"
 	"strings"
 	"sync/atomic"
