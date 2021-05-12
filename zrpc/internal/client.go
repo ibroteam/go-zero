@@ -73,11 +73,10 @@ func (c *client) buildDialOptions(opts ...ClientOption) []grpc.DialOption {
 				alijaeger.AliTracingInterceptor,
 				clientinterceptors.DurationInterceptor,
 				clientinterceptors.BreakerInterceptor,
-				clientinterceptors.PrometheusInterceptor,
+				//clientinterceptors.PrometheusInterceptor,
 				clientinterceptors.TimeoutInterceptor(cliOpts.Timeout),
 			),
 		}
-
 		return append(options, cliOpts.DialOptions...)
 	} else {
 		options := []grpc.DialOption{
@@ -87,11 +86,10 @@ func (c *client) buildDialOptions(opts ...ClientOption) []grpc.DialOption {
 				clientinterceptors.TracingInterceptor,
 				clientinterceptors.DurationInterceptor,
 				clientinterceptors.BreakerInterceptor,
-				clientinterceptors.PrometheusInterceptor,
+				//clientinterceptors.PrometheusInterceptor,
 				clientinterceptors.TimeoutInterceptor(cliOpts.Timeout),
 			),
 		}
-
 		return append(options, cliOpts.DialOptions...)
 	}
 }
