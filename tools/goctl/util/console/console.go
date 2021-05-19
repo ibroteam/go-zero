@@ -72,7 +72,7 @@ func (c *colorConsole) Fatalln(format string, a ...interface{}) {
 }
 
 func (c *colorConsole) MarkDone() {
-	c.Success("Done.")
+	c.Success("%s", "Done.")
 }
 
 func (c *colorConsole) Must(err error) {
