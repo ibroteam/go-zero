@@ -168,7 +168,7 @@ func logBrief(r *http.Request, code int, timer *utils.ElapsedTimer, logs *intern
 	buf.WriteString("\n")
 
 	if duration > slowThreshold {
-		logx.WithContext(r.Context()).Slowf("[HTTP] %d - %s - %s - %s - slowcall(%s)",
+		logx.Slowf("[HTTP] %d - %s - %s - %s - slowcall(%s)",
 			code, r.RequestURI, httpx.GetRemoteAddr(r), r.UserAgent(), timex.ReprOfDuration(duration))
 	}
 
@@ -178,9 +178,9 @@ func logBrief(r *http.Request, code int, timer *utils.ElapsedTimer, logs *intern
 	}
 
 	if ok {
-		logx.WithContext(r.Context()).Info(buf.String())
+		logx.Info(buf.String())
 	} else {
-		logx.WithContext(r.Context()).Error(buf.String())
+		logx.Error(buf.String())
 	}
 }
 
@@ -192,17 +192,17 @@ func logDetails(r *http.Request, response *detailLoggedResponseWriter, timer *ut
 	simpleDumpRequest(r, &buf)
 
 	if duration > slowThreshold {
-		logx.WithContext(r.Context()).Slowf("[HTTP] %d - %s - slowcall(%s)\n=> %s\n",
+		logx.Slowf("[HTTP] %d - %s - slowcall(%s)\n=> %s\n",
 			response.writer.code, r.RemoteAddr, timex.ReprOfDuration(duration), dumpRequest(r))
 	}
 
 	respBuf := response.buf.Bytes()
 	if len(respBuf) > 0 {
-		buf.WriteString("\n")
-		buf.WriteString(string(respBuf))
+		buf.WriteByte('\n')
+		buf.Write(respBuf)
 	}
 
-	logx.WithContext(r.Context()).Info(buf.String())
+	logx.Info(buf.String())
 }
 
 func isOkResponse(code int) bool {
