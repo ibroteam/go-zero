@@ -56,6 +56,12 @@ func (aj *AliJaeger) Trace(ctx context.Context, name string, fn func(ctx context
 	return fn(c, span)
 }
 
+func Trace(ctx context.Context, name string, fn func(ctx context.Context, span opentracing.Span) error) error {
+	span, c := opentracing.StartSpanFromContext(ctx, name)
+	defer span.Finish()
+	return fn(c, span)
+}
+
 // AliTracingHandler http中间件
 func AliTracingHandler(next http.Handler) http.Handler {
 	tracer := opentracing.GlobalTracer()
