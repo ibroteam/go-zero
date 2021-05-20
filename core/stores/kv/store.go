@@ -75,6 +75,7 @@ type (
 		Zrevrange(key string, start, stop int64) ([]string, error)
 		ZrevrangebyscoreWithScores(key string, start, stop int64) ([]redis.Pair, error)
 		ZrevrangebyscoreWithScoresAndLimit(key string, start, stop int64, page, size int) ([]redis.Pair, error)
+		ZrevrangebyscoreWithLimit(key string, page, size int) ([]redis.Pair, error)
 		Zscore(key string, value string) (int64, error)
 		Zrevrank(key, field string) (int64, error)
 	}
@@ -647,6 +648,15 @@ func (cs clusterStore) ZrevrangebyscoreWithScoresAndLimit(key string, start, sto
 	}
 
 	return node.ZrevrangebyscoreWithScoresAndLimit(key, start, stop, page, size)
+}
+
+func (cs clusterStore) ZrevrangebyscoreWithLimit(key string, page, size int) ([]redis.Pair, error) {
+	node, err := cs.getRedis(key)
+	if err != nil {
+		return nil, err
+	}
+
+	return node.ZrevrangebyscoreWithLimit(key, page, size)
 }
 
 func (cs clusterStore) Zrevrank(key, field string) (int64, error) {

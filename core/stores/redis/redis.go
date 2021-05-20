@@ -1700,6 +1700,36 @@ func (s *Redis) ZrevrangebyscoreWithScoresAndLimit(key string, start, stop int64
 	return
 }
 
+// ZrevrangebyscoreWithLimit is the implementation of redis zrevrangebyscore command with scores and limit.
+func (s *Redis) ZrevrangebyscoreWithLimit(key string, page, size int) (
+	val []Pair, err error) {
+	err = s.brk.DoWithAcceptable(func() error {
+		if size <= 0 {
+			return nil
+		}
+
+		conn, err := getRedis(s)
+		if err != nil {
+			return err
+		}
+
+		v, err := conn.ZRevRangeByScoreWithScores(key, red.ZRangeBy{
+			Min:    "-inf",
+			Max:    "+inf",
+			Offset: int64(page * size),
+			Count:  int64(size),
+		}).Result()
+		if err != nil {
+			return err
+		}
+
+		val = toPairs(v)
+		return nil
+	}, acceptable)
+
+	return
+}
+
 // Zrevrank is the implementation of redis zrevrank command.
 func (s *Redis) Zrevrank(key string, field string) (val int64, err error) {
 	err = s.brk.DoWithAcceptable(func() error {
