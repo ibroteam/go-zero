@@ -13,8 +13,12 @@ func (m *default{{.upperStartCamelObject}}Model) Update(ctx context.Context, dat
 }
 
 func (m *default{{.upperStartCamelObject}}Model) UpdateSomeByPrimaryId(ctx context.Context, primaryId int64, updateFields map[string]interface{}) error {
-	sb := strings.Builder{}
 	sz := len(updateFields)
+	if sz < 1 {
+		return nil
+	}
+
+	sb := strings.Builder{}
 	params := make([]interface{}, 0, sz+1)
 	sb.WriteString("update " + m.table + " set ")
 	for k, v := range updateFields {
