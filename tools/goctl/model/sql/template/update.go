@@ -31,7 +31,7 @@ func (m *default{{.upperStartCamelObject}}Model) UpdateSomeByPrimaryId(ctx conte
     _, err := m.Exec(ctx, func(ctx2 context.Context, conn sqlx.SqlConnCtx) (result sql.Result, err error) {
 		return conn.Exec(ctx2, sb.String()[1:], params...)
 	}, {{.keyValues}}){{else}}
-    _,err:=m.conn.Exec(ctx, sb.String()[1:], params...){{end}}
+    _,err := m.conn.Exec(ctx, sb.String()[1:], params...){{end}}
 	return err
 }
 `
