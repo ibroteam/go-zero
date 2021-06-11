@@ -43,15 +43,16 @@ func genUpdate(table Table, withCache bool) (string, string, error) {
 	output, err := util.With("update").
 		Parse(text).
 		Execute(map[string]interface{}{
-			"withCache":             withCache,
-			"upperStartCamelObject": camelTableName,
-			"keys":                  strings.Join(keySet.KeysStr(), "\n"),
-			"keyValues":             strings.Join(keyVariableSet.KeysStr(), ", "),
-			"primaryCacheKey":       table.PrimaryCacheKey.DataKeyExpression,
-			"primaryKeyVariable":    table.PrimaryCacheKey.KeyLeft,
-			"lowerStartCamelObject": stringx.From(camelTableName).Untitle(),
-			"originalPrimaryKey":    wrapWithRawString(table.PrimaryKey.Name.Source()),
-			"expressionValues":      strings.Join(expressionValues, ", "),
+			"withCache":                withCache,
+			"upperStartCamelObject":    camelTableName,
+			"keys":                     strings.Join(keySet.KeysStr(), "\n"),
+			"keyValues":                strings.Join(keyVariableSet.KeysStr(), ", "),
+			"primaryCacheKey":          table.PrimaryCacheKey.DataKeyExpression,
+			"primaryKeyVariable":       table.PrimaryCacheKey.KeyLeft,
+			"lowerStartCamelObject":    stringx.From(camelTableName).Untitle(),
+			"originalPrimaryKey":       wrapWithRawString(table.PrimaryKey.Name.Source()),
+			"originalPrimaryKeyPrefix": table.PrimaryCacheKey.VarLeft,
+			"expressionValues":         strings.Join(expressionValues, ", "),
 		})
 	if err != nil {
 		return "", "", nil
