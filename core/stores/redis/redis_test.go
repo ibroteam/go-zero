@@ -384,7 +384,6 @@ func TestRedis_BitCount(t *testing.T) {
 		val, err = client.BitCount("key", 2, 2)
 		assert.Nil(t, err)
 		assert.Equal(t, int64(0), val)
-
 	})
 }
 
@@ -401,7 +400,7 @@ func TestRedis_BitOpAnd(t *testing.T) {
 		assert.Equal(t, int64(1), val)
 		valStr, err := client.Get("destKey")
 		assert.Nil(t, err)
-		//destKey  binary 110000   ascii 0
+		// destKey  binary 110000   ascii 0
 		assert.Equal(t, "0", valStr)
 	})
 }
@@ -454,9 +453,10 @@ func TestRedis_BitOpXor(t *testing.T) {
 		assert.Equal(t, "\xf0", valStr)
 	})
 }
+
 func TestRedis_BitPos(t *testing.T) {
 	runOnRedis(t, func(client *Redis) {
-		//11111111 11110000 00000000
+		// 11111111 11110000 00000000
 		err := client.Set("key", "\xff\xf0\x00")
 		assert.Nil(t, err)
 
@@ -481,7 +481,6 @@ func TestRedis_BitPos(t *testing.T) {
 		val, err = client.BitPos("key", 1, 2, 2)
 		assert.Nil(t, err)
 		assert.Equal(t, int64(-1), val)
-
 	})
 }
 
@@ -639,6 +638,16 @@ func TestRedis_Set(t *testing.T) {
 		num, err = client.Sdiffstore("key4", "key1", "key2")
 		assert.Nil(t, err)
 		assert.Equal(t, 1, num)
+		_, err = New(client.Addr, badType()).Sinter("key1", "key2")
+		assert.NotNil(t, err)
+		vals, err = client.Sinter("key1", "key2")
+		assert.Nil(t, err)
+		assert.ElementsMatch(t, []string{"2", "3", "4"}, vals)
+		_, err = New(client.Addr, badType()).Sinterstore("key4", "key1", "key2")
+		assert.NotNil(t, err)
+		num, err = client.Sinterstore("key4", "key1", "key2")
+		assert.Nil(t, err)
+		assert.Equal(t, 3, num)
 	})
 }
 
@@ -1035,7 +1044,7 @@ func TestRedisBlpopEx(t *testing.T) {
 func TestRedisGeo(t *testing.T) {
 	runOnRedis(t, func(client *Redis) {
 		client.Ping()
-		var geoLocation = []*GeoLocation{{Longitude: 13.361389, Latitude: 38.115556, Name: "Palermo"}, {Longitude: 15.087269, Latitude: 37.502669, Name: "Catania"}}
+		geoLocation := []*GeoLocation{{Longitude: 13.361389, Latitude: 38.115556, Name: "Palermo"}, {Longitude: 15.087269, Latitude: 37.502669, Name: "Catania"}}
 		v, err := client.GeoAdd("sicily", geoLocation...)
 		assert.Nil(t, err)
 		assert.Equal(t, int64(2), v)
@@ -1053,7 +1062,7 @@ func TestRedisGeo(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, int64(v4[0].Dist), int64(190))
 		assert.Equal(t, int64(v4[1].Dist), int64(56))
-		var geoLocation2 = []*GeoLocation{{Longitude: 13.583333, Latitude: 37.316667, Name: "Agrigento"}}
+		geoLocation2 := []*GeoLocation{{Longitude: 13.583333, Latitude: 37.316667, Name: "Agrigento"}}
 		v5, err := client.GeoAdd("sicily", geoLocation2...)
 		assert.Nil(t, err)
 		assert.Equal(t, int64(1), v5)
@@ -1087,7 +1096,6 @@ func runOnRedis(t *testing.T, fn func(client *Redis)) {
 		}
 	}()
 	fn(NewRedis(s.Addr(), NodeType))
-
 }
 
 func runOnRedisTLS(t *testing.T, fn func(client *Redis)) {

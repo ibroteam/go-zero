@@ -8,6 +8,7 @@ import (
 	"github.com/tal-tech/go-zero/core/collection"
 	"github.com/tal-tech/go-zero/tools/goctl/model/sql/converter"
 	"github.com/tal-tech/go-zero/tools/goctl/model/sql/model"
+	"github.com/tal-tech/go-zero/tools/goctl/model/sql/util"
 	"github.com/tal-tech/go-zero/tools/goctl/util/console"
 	"github.com/tal-tech/go-zero/tools/goctl/util/stringx"
 	"github.com/xwb1989/sqlparser"
@@ -165,13 +166,11 @@ func convertColumns(columns []*sqlparser.ColumnDefinition, primaryColumn string)
 			comment = string(column.Type.Comment.Val)
 		}
 
-		var isDefaultNull = true
+		isDefaultNull := true
 		if column.Type.NotNull {
 			isDefaultNull = false
 		} else {
-			if column.Type.Default == nil {
-				isDefaultNull = false
-			} else if string(column.Type.Default.Val) != "null" {
+			if column.Type.Default != nil {
 				isDefaultNull = false
 			}
 		}
@@ -185,7 +184,7 @@ func convertColumns(columns []*sqlparser.ColumnDefinition, primaryColumn string)
 		field.Name = stringx.From(column.Name.String())
 		field.DataBaseType = column.Type.Type
 		field.DataType = dataType
-		field.Comment = comment
+		field.Comment = util.TrimNewLine(comment)
 
 		if field.Name.Source() == primaryColumn {
 			primaryKey = Primary{
