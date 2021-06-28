@@ -12,7 +12,7 @@ import (
 )
 
 func execWithCtx(ctx context.Context, conn sessionConn, q string, args ...interface{}) (sql.Result, error) {
-	stmt := formatForPrint(q, args)
+	stmt, err := format(q, args...)
 	span, _ := opentracing.StartSpanFromContext(ctx, "db")
 	defer span.Finish()
 	ext.DBStatement.Set(span, q)
