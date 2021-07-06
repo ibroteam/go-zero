@@ -3,6 +3,7 @@ package kv
 import (
 	"errors"
 	"log"
+	"time"
 
 	"github.com/tal-tech/go-zero/core/errorx"
 	"github.com/tal-tech/go-zero/core/hash"
@@ -78,6 +79,7 @@ type (
 		ZrevrangebyscoreWithLimit(key string, page, size int) ([]redis.Pair, error)
 		Zscore(key, value string) (int64, error)
 		Zrevrank(key, field string) (int64, error)
+		Time() (val *time.Time, err error)
 	}
 
 	clusterStore struct {
@@ -684,4 +686,12 @@ func (cs clusterStore) getRedis(key string) (*redis.Redis, error) {
 	}
 
 	return val.(*redis.Redis), nil
+}
+
+func (cs clusterStore) Time() (*time.Time, error) {
+	node, err := cs.getRedis("TIME")
+	if err != nil {
+		return nil, err
+	}
+	return node.Time()
 }

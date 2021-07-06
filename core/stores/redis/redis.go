@@ -1853,3 +1853,17 @@ func toStrings(vals []interface{}) []string {
 	}
 	return ret
 }
+
+// Time 提取当前服务器时间
+func (s *Redis) Time() (val *time.Time, err error) {
+	err = s.brk.DoWithAcceptable(func() error {
+		conn, err := getRedis(s)
+		if err != nil {
+			return err
+		}
+		v, err := conn.Time().Result()
+		val = &v
+		return err
+	}, acceptable)
+	return
+}
