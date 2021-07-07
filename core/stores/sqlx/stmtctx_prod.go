@@ -9,8 +9,7 @@ import (
 )
 
 func execWithCtx(ctx context.Context, conn sessionConn, q string, args ...interface{}) (sql.Result, error) {
-	stmt := formatForPrint(q, args)
-
+	stmt, err := format(q, args...)
 	result, err := conn.Exec(q, args...)
 	if err != nil {
 		logSqlError(stmt, err)
